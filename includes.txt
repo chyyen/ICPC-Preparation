@@ -6,6 +6,8 @@ Data-Structure
 	LazyTagSegtree.h
 	LiChaoTree.h
 	Treap.h
+Graph
+	RoundSquareTree.h
 Flow
 	Dinic.h
 Math
