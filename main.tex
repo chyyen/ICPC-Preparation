@@ -1,0 +1,541 @@
+\documentclass[10pt, a4paper, twocolumn, oneside]{article}
+% \usepackage[utf8]{inputenc}
+
+\usepackage[cache = false]{minted}
+\usemintedstyle{manni}
+
+\setlength{\headheight}{15.60004pt}
+
+% \setlength{\topmargin}{0pt}
+\setlength{\topmargin}{-3.60004pt}
+
+\setlength{\headsep}{10pt}
+\setlength{\textheight}{780pt}
+\setlength{\footskip}{20pt}
+\setlength{\voffset}{-60pt}
+\setlength{\textwidth}{560pt}
+\setlength{\marginparsep}{0pt}
+\setlength{\marginparwidth}{0pt}
+\setlength{\marginparpush}{0pt}
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+\setlength{\hoffset}{-53pt}
+\setlength{\columnsep}{15pt}
+\setlength{\columnseprule}{0pt}
+\setlength{\parskip}{2.4pt}
+\setlength{\parindent}{0pt}
+\setlength{\lineskip}{1.2pt}
+% \setlength{\extrarowheight}{8pt}
+
+\usepackage{fancyhdr}
+% \pagestyle{fancy}
+% \fancyhf{}
+% \fancyhead[R]{\thepage}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyheadoffset{0cm}
+\renewcommand{\headrulewidth}{0pt} 
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[R]{\thepage}
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyhead[R]{\thepage}%
+}
+
+\newenvironment{code}{\VerbatimEnvironment\begin{minted}[mathescape, breaklines, linenos, numbersep=5pt, frame=lines, framesep=2mm]{c++}}{\end{minted}}
+
+\title{Codebook}
+% \author{chyen}
+\date{\today}\begin{document}
+\maketitle
+\tableofcontents
+\section{Setup}
+\subsection{Template}
+\begin{code}
+#include<bits/stdc++.h>
+#include<bits/extc++.h>
+#define F first
+#define S second
+#define pb push_back
+#define pob pop_back
+#define pf push_front
+#define pof pop_front
+#define mp make_pair
+#define mt make_tuple
+#define all(x) (x).begin(),(x).end()
+using namespace std;
+//using namespace __gnu_pbds;
+using pii = pair<long long,long long>;
+using ld = long double;
+using ll = long long;
+const int mod = 1000000007;
+const int mod2 = 998244353;
+const ld PI = acos(-1);
+#define Bint __int128
+#define int long long
+\end{code}
+\subsection{vimrc}
+\begin{code}
+syntax on
+set mouse=a
+set nu
+set ts=4
+set sw=4
+set smartindent
+set cursorline
+set hlsearch
+set incsearch
+set t_Co=256
+nnoremap y ggyG
+colorscheme afterglow
+au BufNewFile *.cpp 0r ~/default_code/default.cpp | let IndentStyle = "cpp"
+\end{code}
+\section{Data-structure}
+\subsection{PBDS}
+\begin{code}
+gp_hash_table<T, T> h;
+tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update> tr;
+tr.order_of_key(x); // find x's ranking
+tr.find_by_order(k); // find k-th minimum, return iterator 
+\end{code}
+\subsection{LazyTagSegtree}
+\begin{code}
+struct segment_tree{
+  int seg[N << 2];
+  int tag1[N << 2], tag2[N << 2];
+  void down(int l, int r, int idx, int pidx){
+    int v = tag1[pidx], vv = tag2[pidx];
+    if(v)
+      tag1[idx] = v, seg[idx] = v * (r - l + 1), tag2[idx] = 0;
+    if(vv)
+      tag2[idx] += vv, seg[idx] += vv * (r - l + 1);
+  }
+  void Set(int l, int r, int ql, int qr, int v, int idx = 1){
+    if(ql == l && qr == r){
+      tag1[idx] = v;
+      tag2[idx] = 0;
+      seg[idx] = v * (r - l + 1);
+      return;
+    }
+    int mid = (l + r) >> 1;
+    down(l, mid, idx << 1, idx);
+    down(mid + 1, r, idx << 1 | 1, idx);
+    tag1[idx] = tag2[idx] = 0;
+    if(qr <= mid)
+      Set(l, mid, ql, qr, v, idx << 1);
+    else if(ql > mid)
+      Set(mid + 1, r, ql, qr, v, idx << 1 | 1);
+    else{
+      Set(l, mid, ql, mid, v, idx << 1);
+      Set(mid + 1, r, mid + 1, qr, v, idx << 1 | 1);
+    }
+    seg[idx] = seg[idx << 1] + seg[idx << 1 | 1];
+  }
+  void Increase(int l, int r, int ql, int qr, int v, int idx = 1){
+    if(ql ==l && qr == r){
+      tag2[idx] += v;
+      seg[idx] +=  v * (r - l + 1);
+      return;
+    }
+    int mid = (l + r) >> 1;
+    down(l, mid, idx << 1, idx);
+    down(mid + 1, r, idx << 1 | 1, idx);
+    tag1[idx] = tag2[idx] = 0;
+    if(qr <= mid)
+      Increase(l, mid, ql, qr, v, idx << 1);
+    else if(ql > mid)
+      Increase(mid + 1, r, ql, qr, v, idx << 1 | 1);
+    else{
+      Increase(l, mid, ql, mid, v, idx << 1);
+      Increase(mid + 1, r, mid + 1, qr, v, idx << 1 | 1);
+    }
+    seg[idx] = seg[idx << 1] + seg[idx << 1 | 1];
+  }
+  int query(int l, int r, int ql, int qr, int idx = 1){
+    if(ql ==l && qr == r)
+      return seg[idx];
+    int mid = (l + r) >> 1;
+    down(l, mid, idx << 1, idx);
+    down(mid + 1, r, idx << 1 | 1, idx);
+    tag1[idx] = tag2[idx] = 0;
+    if(qr <= mid)
+      return query(l, mid, ql, qr, idx << 1);
+    else if(ql > mid)
+      return query(mid + 1, r, ql, qr, idx << 1 | 1);
+    return query(l, mid, ql, mid, idx << 1) + query(mid + 1, r, mid + 1, qr, idx << 1 | 1);
+  }
+  void modify(int l, int r, int ql, int qr, int v, int type){
+    // type 1: increasement, type 2: set
+    if(type == 2)
+      Set(l, r, ql, qr, v); 
+    else
+      Increase(l, r, ql, qr, v);
+  }
+};\end{code}
+\subsection{LiChaoTree}
+\begin{code}
+struct line{
+  int m, c;
+  int val(int x){
+    return m * x + c;
+  }
+  line(){}
+  line(int _m, int _c){
+    m = _m, c = _c;
+  }
+};
+struct Li_Chao_Tree{
+  line seg[N << 2];
+  void ins(int l, int r, int idx, line x){
+    if(l == r){
+      if(x.val(l) > seg[idx].val(l))
+        seg[idx] = x;
+      return;
+    }
+    int mid = (l + r) >> 1;
+    if(x.m < seg[idx].m)
+      swap(x, seg[idx]);
+    // ensure x.m > seg[idx].m
+    if(seg[idx].val(mid) <= x.val(mid)){
+      swap(x, seg[idx]);
+      ins(l, mid, idx << 1, x);
+    }
+    else
+      ins(mid + 1, r, idx << 1 | 1, x);
+  }
+  int query(int l, int r, int p, int idx){
+    if(l == r)
+      return seg[idx].val(l);
+    int mid = (l + r) >> 1;
+    if(p <= mid)
+      return max(seg[idx].val(p), query(l, mid, p, idx << 1));
+    else
+      return max(seg[idx].val(p), query(mid + 1, r, p, idx << 1 | 1));
+  }
+}\end{code}
+\subsection{Treap}
+\begin{code}
+mt19937 mtrd(chrono::steady_clock::now().time_since_epoch().count());
+struct Treap{
+  Treap *l, *r;
+  int pri, key, sz;
+  Treap(){}
+  Treap(int _v){
+    l = r = NULL;
+    pri = mtrd();
+    key = _v;
+    sz = 1;
+  }
+  ~Treap(){
+        if ( l )
+            delete l;
+        if ( r )
+            delete r;
+    }  
+  void push(){
+    for(auto ch : {l, r}){
+      if(ch){
+        // do something
+      }
+    }
+  }
+};
+int getSize(Treap *t){
+  return t ? t->sz : 0;
+}
+void pull(Treap *t){
+  t->sz = getSize(t->l) + getSize(t->r) + 1;
+}
+Treap* merge(Treap* a, Treap* b){
+  if(!a || !b)
+    return a ? a : b;
+  if(a->pri > b->pri){
+    a->push();
+    a->r = merge(a->r, b);
+    pull(a);
+    return a;
+  }
+  else{
+    b->push();
+    b->l = merge(a, b->l);
+    pull(b);
+    return b;
+  }
+}
+void splitBySize(Treap *t, Treap *&a, Treap *&b, int k){
+  if(!t)
+    a = b = NULL;
+  else if(getSize(t->l) + 1 <= k){
+    a = t;
+    a->push();
+    splitBySize(t->r, a->r, b, k - getSize(t->l) - 1);
+    pull(a);
+  }
+  else{
+    b = t;
+    b->push();
+    splitBySize(t->l, a, b->l, k);
+    pull(b);
+  }
+}
+void splitByKey(Treap *t, Treap *&a, Treap *&b, int k){
+    if(!t)
+        a = b = NULL;
+    else if(t->key <= k){
+        a = t;
+        a->push();
+        splitByKey(t->r, a->r, b, k);
+        pull(a);
+    }
+    else{
+        b = t;
+        b->push();
+        splitByKey(t->l, a, b->l, k);
+        pull(b);
+    }
+}
+// O(n) build treap with sorted key nodes
+void traverse(Treap *t){
+  if(t->l)
+    traverse(t->l);
+  if(t->r)
+    traverse(t->r);
+  pull(t);
+}
+Treap *build(int n){
+  vector<Treap*>st(n);
+  int tp = 0;
+  for(int i = 0, x; i < n; i++){
+    cin >> x;
+    Treap *nd = new Treap(x);
+    while(tp && st[tp - 1]->pri < nd->pri)
+      nd->l = st[tp - 1], tp--;
+    if(tp)
+      st[tp - 1]->r = nd;
+    st[tp++] = nd;
+  }
+  if(!tp){
+    st[0] = NULL;
+    return st[0];
+  }
+  traverse(st[0]);
+  return st[0];
+}
+\end{code}
+\section{Flow}
+\subsection{Dinic}
+\begin{code}
+struct Max_Flow{
+  struct Edge{
+    int cap, to, rev;
+    Edge(){}
+    Edge(int _to, int _cap, int _rev){
+      to = _to, cap = _cap, rev = _rev;
+    }
+  };
+  const int inf = 1e18+10;
+  int s, t; // start node and end node
+  vector<vector<Edge>>G;
+  vector<int>dep;
+  vector<int>iter;
+  void addE(int u, int v, int cap){
+    G[u].pb(Edge(v, cap, G[v].size()));
+    // direct graph
+    G[v].pb(Edge(u, 0, G[u].size() - 1));
+    // undirect graph
+    // G[v].pb(Edge(u, cap, G[u].size() - 1));
+  }
+  void bfs(){
+    queue<int>q;
+    q.push(s);
+    dep[s] = 0;
+    while(!q.empty()){
+      int cur = q.front();
+      q.pop();
+      for(auto i : G[cur]){
+        if(i.cap > 0 && dep[i.to] == -1){
+          dep[i.to] = dep[cur] + 1;
+          q.push(i.to);
+        }
+      }
+    }
+  }
+  int dfs(int x, int fl){
+    if(x == t)
+      return fl;
+    for(int _ = iter[x] ; _ < G[x].size() ; _++){
+      auto &i = G[x][_];
+      if(i.cap > 0 && dep[i.to] == dep[x] + 1){
+        int res = dfs(i.to, min(fl, i.cap));
+        if(res <= 0)
+          continue;
+        i.cap -= res;
+        G[i.to][i.rev].cap += res;
+        return res;
+      }
+      iter[x]++;
+    }
+    return 0;
+  }
+  int Dinic(){
+    int res = 0;
+    while(true){
+      fill(all(dep), -1);
+      fill(all(iter), 0);
+      bfs();
+      if(dep[t] == -1)
+        break;
+      int cur;
+      while((cur = dfs(s, INF)) > 0)
+        res += cur;
+    }
+    return res;
+  }
+  void init(int _n, int _s, int _t){
+    s = _s, t = _t;
+    G.resize(_n + 5);
+    dep.resize(_n + 5);
+    iter.resize(_n + 5);
+  }
+};
+\end{code}
+\section{Math}
+\subsection{FastPow}
+\begin{code}
+long long qpow(long long x, long long powcnt, long long tomod){
+  long long res = 1;
+  for(; powcnt ; powcnt >>= 1 , x = (x * x) % tomod)
+    if(1 & powcnt)
+      res = (res * x) % tomod;
+  return (res % tomod);
+}\end{code}
+\subsection{EXGCD}
+\begin{code}
+// ax + by = c
+// return (gcd(a, b), x, y)
+tuple<long long, long long, long long>exgcd(long long a, long long b){
+  if(b == 0)
+    return make_tuple(a, 1, 0);
+  auto[g, x, y] = exgcd(b, a % b);
+  return make_tuple(g, y, x - (a / b) * y);
+}\end{code}
+\subsection{EXCRT}
+\begin{code}
+long long inv(long long x){ return qpow(x, mod - 2, mod); }
+long long mul(long long x, long long y, long long m){
+   x = ((x % m) + m) % m, y = ((y % m) + m) % m;
+  long long ans = 0;
+  while(y){
+    if(y & 1)
+      ans = (ans + x) % m;
+    x = x * 2 % m;
+    y >>= 1; 
+  }
+  return ans;
+}
+pii ExCRT(long long r1, long long m1, long long r2, long long m2){
+  long long g, x, y;
+  tie(g, x, y) = exgcd(m1, m2);
+  if((r1 - r2) % g)
+    return {-1, -1};
+  long long lcm = (m1 / g) * m2;
+  long long res = (mul(mul(m1, x, lcm), ((r2 - r1) / g), lcm) + r1) % lcm;
+  res = (res + lcm) % lcm;
+  return {res, lcm};
+}
+void solve(){
+  long long n, r, m;
+  cin >> n;
+  cin >> m >> r; // x == r (mod m)
+  for(long long i = 1 ; i < n ; i++){
+    long long r1, m1;
+    cin >> m1 >> r1;
+    if(r != -1 && m != -1)
+      tie(r, m) = ExCRT(r m, r1, m1);
+  }
+  if(r == -1 && m == -1)
+    cout << "no solution\n";
+  else
+    cout << r << '\n';
+}
+\end{code}
+\subsection{GeneratingFunctions}
+\begin{itemize}
+\item Ordinary Generating Function
+$A(x) = \sum_{i\ge 0} a_ix^i$
+\begin{itemize}
+    \itemsep-0.5em
+    \item $A(rx)             \Rightarrow r^na_n$
+    \item $A(x) + B(x)       \Rightarrow a_n + b_n$
+    \item $A(x)B(x)          \Rightarrow \sum_{i=0}^{n} a_ib_{n-i}$
+    \item $A(x)^k            \Rightarrow \sum_{i_1+i_2+\cdots+i_k=n} a_{i_1}a_{i_2}\ldots a_{i_k}$
+    \item $xA(x)'            \Rightarrow na_n$
+    \item $\frac{A(x)}{1-x}  \Rightarrow \sum_{i=0}^{n} a_i$
+\end{itemize}
+\item Exponential Generating Function
+$A(x) = \sum_{i\ge 0} \frac{a_i}{i!}x_i$
+\begin{itemize}
+    \itemsep-0.5em
+    \item $A(x) + B(x)       \Rightarrow a_n + b_n$
+    \item $A^{(k)}(x)        \Rightarrow a_{n+k}$
+    \item $A(x)B(x)          \Rightarrow \sum_{i=0}^{n} \binom{n}{i}a_ib_{n-i}$
+    \item $A(x)^k            \Rightarrow \sum_{i_1+i_2+\cdots+i_k=n} \binom{n}{i_1, i_2, \ldots, i_k}a_{i_1}a_{i_2}\ldots a_{i_k}$
+    \item $xA(x)             \Rightarrow na_n$
+\end{itemize}
+\item Special Generating Function
+\begin{itemize}
+    \itemsep-0.5em
+    \item $(1+x)^n           = \sum_{i\ge 0} \binom{n}{i}x^i$
+    \item $\frac{1}{(1-x)^n} = \sum_{i\ge 0} \binom{i}{n-1}x^i$
+\end{itemize}
+\end{itemize}
+\subsection{Numbers}
+\begin{itemize}
+\item Stirling numbers of the second kind
+Partitions of $n$ distinct elements into exactly $k$ groups. 
+$S(n, k) = S(n - 1, k - 1) + kS(n - 1, k), S(n, 1) = S(n, n) = 1$
+$S(n, k) = \frac{1}{k!}\sum_{i=0}^{k}(-1)^{k-i}{k \choose i}i^n$
+$x^n     = \sum_{i=0}^{n} S(n, i) (x)_i$
+\item Catalan numbers
+$C_n = \frac{1}{n+1}\binom{2n}{n} = \binom{2n}{n}-\binom{2n}{n+1}\ , \forall n \geq 0 $
+$C_{n+1} = \sum_{i=0}^{n} C_iC_{n-i} = \frac{2(2n+1)}{n+2}C_n,\ C_0 = 1$
+\end{itemize}
+\subsection{Theorem}
+\begin{itemize}
+\item Cayley's Formula
+\begin{itemize}
+    \itemsep-0.5em
+  \item Given a degree sequence $d_1, d_2, \ldots, d_n$ for each \textit{labeled} vertices, there are $\frac{(n - 2)!}{(d_1 - 1)!(d_2 - 1)!\cdots(d_n - 1)!}$ spanning trees.
+  \item Let $T_{n, k}$ be the number of \textit{labeled} forests on $n$ vertices with $k$ components, such that vertex $1, 2, \ldots, k$ belong to different components. Then $T_{n, k} = kn^{n - k - 1}$.
+\end{itemize}
+\item Erdős–Gallai theorem 
+A sequence of nonnegative integers $d_1\ge\cdots\ge d_n$ can be represented as the degree sequence of a finite simple graph on $n$ vertices if and only if $d_1+\cdots+d_n$ is even and $\displaystyle\sum_{i-1}^kd_i\le k(k-1)+\displaystyle\sum_{i=k+1}^n\min(d_i,k)$ holds for every $1\le k\le n$.
+\item Gale–Ryser theorem
+A pair of sequences of nonnegative integers $a_1\ge\cdots\ge a_n$ and $b_1,\ldots,b_n$ is bigraphic if and only if $\displaystyle\sum_{i=1}^n a_i=\displaystyle\sum_{i=1}^n b_i$ and $\displaystyle\sum_{i=1}^k a_i\le \displaystyle\sum_{i=1}^n\min(b_i,k)$ holds for every $1\le k\le n$.
+\item Flooring and Ceiling function identity
+\begin{itemize} 
+    \itemsep-0.1em
+  \item $\lfloor \frac{\lfloor \frac{a}{b} \rfloor}{c} \rfloor = \lfloor \frac{a}{bc} \rfloor$
+  \item $\lceil \frac{\lceil \frac{a}{b} \rceil}{c} \rceil = \lceil \frac{a}{bc} \rceil$
+  \item $\lceil \frac{a}{b} \rceil \leq \frac{a+b-1}{b}$
+  \item $\lfloor \frac{a}{b} \rfloor \leq \frac{a-b+1}{b}$ 
+\end{itemize}
+\item Möbius inversion formula
+\begin{itemize}
+    \itemsep-0.5em
+  \item $f(n)=\sum_{d\mid n}g(d)\Leftrightarrow g(n)=\sum_{d\mid n}\mu(d)f(\frac{n}{d})$
+  \item $f(n)=\sum_{n\mid d}g(d)\Leftrightarrow g(n)=\sum_{n\mid d}\mu(\frac{d}{n})f(d)$
+  \item $\sum_{d \vert n}^{n=1} \mu (d)  = 1$
+  \item $\sum_{d \vert n}^{n \neq 1} \mu (d)  = 0$
+\end{itemize}
+\item Spherical cap
+\begin{itemize}
+    \itemsep-0.5em
+  \item A portion of a sphere cut off by a plane.
+  \item $r$: sphere radius, $a$: radius of the base of the cap, $h$: height of the cap, $\theta$: $\arcsin(a/r)$.
+  \item Volume $=\pi h^2(3r-h)/3=\pi h(3a^2+h^2)/6=\pi r^3(2+\cos\theta)(1-\cos\theta)^2/3$.
+  \item Area $=2\pi rh=\pi(a^2+h^2)=2\pi r^2(1-\cos\theta)$.
+\end{itemize}
+\end{itemize}
+\end{document}

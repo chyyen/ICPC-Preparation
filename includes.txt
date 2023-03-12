@@ -1,0 +1,17 @@
+Setup
+	Template.h
+	vimrc.h
+Data-Structure
+	PBDS.h
+	LazyTagSegtree.h
+	LiChaoTree.h
+	Treap.h
+Flow
+	Dinic.h
+Math
+	FastPow.h
+	EXGCD.h
+	EXCRT.h
+	GeneratingFunctions.tex
+	Numbers.tex
+	Theorem.tex

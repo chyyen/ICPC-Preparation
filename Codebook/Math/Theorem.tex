@@ -1,0 +1,48 @@
+\begin{itemize}
+\item Cayley's Formula
+
+\begin{itemize}
+    \itemsep-0.5em
+  \item Given a degree sequence $d_1, d_2, \ldots, d_n$ for each \textit{labeled} vertices, there are $\frac{(n - 2)!}{(d_1 - 1)!(d_2 - 1)!\cdots(d_n - 1)!}$ spanning trees.
+  \item Let $T_{n, k}$ be the number of \textit{labeled} forests on $n$ vertices with $k$ components, such that vertex $1, 2, \ldots, k$ belong to different components. Then $T_{n, k} = kn^{n - k - 1}$.
+\end{itemize}
+
+\item Erdős–Gallai theorem 
+
+A sequence of nonnegative integers $d_1\ge\cdots\ge d_n$ can be represented as the degree sequence of a finite simple graph on $n$ vertices if and only if $d_1+\cdots+d_n$ is even and $\displaystyle\sum_{i-1}^kd_i\le k(k-1)+\displaystyle\sum_{i=k+1}^n\min(d_i,k)$ holds for every $1\le k\le n$.
+
+\item Gale–Ryser theorem
+
+A pair of sequences of nonnegative integers $a_1\ge\cdots\ge a_n$ and $b_1,\ldots,b_n$ is bigraphic if and only if $\displaystyle\sum_{i=1}^n a_i=\displaystyle\sum_{i=1}^n b_i$ and $\displaystyle\sum_{i=1}^k a_i\le \displaystyle\sum_{i=1}^n\min(b_i,k)$ holds for every $1\le k\le n$.
+
+\item Flooring and Ceiling function identity
+
+\begin{itemize} 
+    \itemsep-0.1em
+  \item $\lfloor \frac{\lfloor \frac{a}{b} \rfloor}{c} \rfloor = \lfloor \frac{a}{bc} \rfloor$
+  \item $\lceil \frac{\lceil \frac{a}{b} \rceil}{c} \rceil = \lceil \frac{a}{bc} \rceil$
+  \item $\lceil \frac{a}{b} \rceil \leq \frac{a+b-1}{b}$
+  \item $\lfloor \frac{a}{b} \rfloor \leq \frac{a-b+1}{b}$ 
+\end{itemize}
+
+\item Möbius inversion formula
+
+\begin{itemize}
+    \itemsep-0.5em
+  \item $f(n)=\sum_{d\mid n}g(d)\Leftrightarrow g(n)=\sum_{d\mid n}\mu(d)f(\frac{n}{d})$
+  \item $f(n)=\sum_{n\mid d}g(d)\Leftrightarrow g(n)=\sum_{n\mid d}\mu(\frac{d}{n})f(d)$
+  \item $\sum_{d \vert n}^{n=1} \mu (d)	= 1$
+  \item $\sum_{d \vert n}^{n \neq 1} \mu (d)	= 0$
+\end{itemize}
+
+\item Spherical cap
+
+\begin{itemize}
+    \itemsep-0.5em
+  \item A portion of a sphere cut off by a plane.
+  \item $r$: sphere radius, $a$: radius of the base of the cap, $h$: height of the cap, $\theta$: $\arcsin(a/r)$.
+  \item Volume $=\pi h^2(3r-h)/3=\pi h(3a^2+h^2)/6=\pi r^3(2+\cos\theta)(1-\cos\theta)^2/3$.
+  \item Area $=2\pi rh=\pi(a^2+h^2)=2\pi r^2(1-\cos\theta)$.
+\end{itemize}
+
+\end{itemize}
