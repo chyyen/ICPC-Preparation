@@ -10,6 +10,9 @@ Graph
 	RoundSquareTree.h
 	SCC.h
 	2SAT.h
+	bridge.h
+	BronKerbosch_algorithm.h
+	Theorem.tex
 Flow
 	Dinic.h
 Math

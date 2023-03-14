@@ -22,8 +22,8 @@ void tarjan(int x, int px){
             tarjan(i, x);
             low[x] = min(low[x], low[i]);
             if(dep[x] <= low[i]){
-                sz[++cnt] = 0;
                 int z;
+				cnt++;
                 do{
                     z = stk.back();
                     rstree[cnt].push_back(z);

@@ -348,8 +348,8 @@ void tarjan(int x, int px){
             tarjan(i, x);
             low[x] = min(low[x], low[i]);
             if(dep[x] <= low[i]){
-                sz[++cnt] = 0;
                 int z;
+        cnt++;
                 do{
                     z = stk.back();
                     rstree[cnt].push_back(z);
@@ -434,6 +434,81 @@ struct two_sat{
   }
 };
 \end{code}
+\subsection{bridge}
+\begin{code}
+int dep[N], low[N];
+vector<int>G[N];
+vector<pair<int, int>>bridge;
+void init(){
+  for(int i = 1; i <= n; i++){
+    G[i].clear();
+    dep[i] = low[i] = -1;
+  }
+  dep[1] = low[1] = 0;
+}
+void tarjan(int x, int px){
+  for(auto i : G[x]){
+    if(dep[i] == -1){
+      dep[i] = low[i] = dep[x] + 1;
+      tarjan(i, x);
+      low[x] = min(low[x], low[i]);
+      if(low[i] > dep[x])
+        bridge.push_back(make_pair(i, x));
+    }
+    else if(i != px)
+      low[x] = min(low[x], dep[i]);
+  }
+}
+\end{code}
+\subsection{BronKerbosch_algorithm}
+\begin{code}
+vector<vector<int>>maximal_clique;
+int cnt, G[N][N], all[N][N], some[N][N], none[N][N];
+void dfs(int d, int an, int sn, int nn)
+{
+    if(sn == 0 && nn == 0){
+    vector<int>v;
+    for(int i = 0; i < an; i++)
+      v.push_back(all[d][i]);
+    maximal_clique.push_back(v);
+    cnt++;
+    }
+  int u = sn > 0 ? some[d][0] : none[d][0];
+    for(int i = 0; i < sn; i ++)
+    {
+        int v = some[d][i];
+        if(G[u][v])
+      continue;
+        int tsn = 0, tnn = 0;
+        for(int j = 0; j < an; j ++)
+      all[d + 1][j] = all[d][j];
+        all[d + 1][an] = v;
+        for(int j = 0; j < sn; j ++)
+            if(g[v][some[d][j]])
+        some[d + 1][tsn ++] = some[d][j];
+        for(int j = 0; j < nn; j ++)
+            if(g[v][none[d][j]]) 
+        none[d + 1][tnn ++] = none[d][j];
+        dfs(d + 1, an + 1, tsn, tnn);
+        some[d][i] = 0, none[d][nn ++] = v;
+    }
+}
+void process(){
+    cnt = 0;
+    for(int i = 0; i < n; i ++)
+    some[0][i] = i + 1;
+    dfs(0, 0, n, 0);
+}
+\end{code}
+\subsection{Theorem}
+\begin{itemize}
+\item Kosaraju's algorithm visit the strong connected components in topolocical order at second dfs.
+\item Euler's formula on planar graph:  $V - E + F = C + 1$
+\item Kuratowski's theorem: A simple graph $G$ is a planar graph iff $G$ doesn't has a subgraph $H$ such that $H$ is homeomorphic to $K_5$ or $K_{3,3}$
+\item A complement set of every vertex cover correspond to a independent set. $\Rightarrow$ Number of vertex of maximum independent set $+$ Number of vertex of minimum vertex cover $= \lvert V \rvert$
+\item Maximum independent set of $G =$ Maximum clique of the complement graph of $G$ . 
+\item A planar graph $G$ colored with three colors iff there exist a maximal clique $I$ such that $G - I$ is a bipartite. 
+\end{itemize}
 \section{Flow}
 \subsection{Dinic}
 \begin{code}
