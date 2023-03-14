@@ -365,6 +365,75 @@ void tarjan(int x, int px){
     }
 }
 \end{code}
+\subsection{SCC}
+\begin{code}
+struct SCC{
+  int n;
+  int cnt;
+  vector<vector<int>>G, revG;
+  vector<int>stk, sccid;
+  vector<bool>vis;
+  SCC(): SCC(0) {}
+  SCC(int _n): n(_n), G(_n + 1), revG(_n + 1), sccid(_n + 1), vis(_n + 1), cnt(0) {}
+  void addEdge(int u, int v){
+    // u -> v
+    assert(u > 0 && u <= n);
+    assert(v > 0 && v <= n);
+    G[u].push_back(v);
+    revG[v].push_back(u);
+  }
+  void dfs1(int u){
+    vis[u] = 1;
+    for(int v : G[u]){
+      if(!vis[v])
+        dfs1(v);
+    }
+    stk.push_back(u);
+  }
+  void dfs2(int u, int k){
+    vis[u] = 1;
+    sccid[u] = k;
+    for(int v : revG[u]){
+      if(!vis[v])
+        dfs2(v, k);
+    }
+  }
+  void Kosaraju(){
+    for(int i = 1; i <= n; i++)
+      if(!vis[i])
+        dfs1(i);
+    fill(vis.begin(), vis.end(), 0);
+    while(!stk.empty()){
+      if(!vis[stk.back()])
+        dfs2(stk.back(), ++cnt);
+      stk.pop_back();
+    }
+  }
+};
+\end{code}
+\subsection{2SAT}
+\begin{code}
+struct two_sat{
+  int n;
+  SCC G; // u: u, u + n: ~u
+  vector<int>ans;
+  two_sat(): two_sat(0) {}
+  two_sat(int _n): n(_n), G(2 * _n), ans(_n + 1) {}
+  void disjunction(int a, int b){
+    G.addEdge((a > n ? a - n : a + n), b);
+    G.addEdge((b > n ? b - n : b + n), a);
+  }
+  bool solve(){
+    G.Kosaraju();
+    for(int i = 1; i <= n; i++){
+      if(G.sccid[i] == G.sccid[i + n])
+        return false;
+      ans[i] = (G.sccid[i] > G.sccid[i + n]);
+    }
+    return true;
+  }
+};
+\end{code}
 \section{Flow}
 \subsection{Dinic}
 \begin{code}

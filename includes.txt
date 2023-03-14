@@ -8,6 +8,8 @@ Data-Structure
 	Treap.h
 Graph
 	RoundSquareTree.h
+	SCC.h
+	2SAT.h
 Flow
 	Dinic.h
 Math
