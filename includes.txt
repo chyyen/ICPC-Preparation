@@ -13,6 +13,8 @@ Graph
 	bridge.h
 	BronKerbosch_algorithm.h
 	Theorem.tex
+String
+	SuffixArray.h
 Flow
 	Dinic.h
 Math
