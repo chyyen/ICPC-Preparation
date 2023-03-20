@@ -14,6 +14,7 @@ Graph
 	BronKerbosch_algorithm.h
 	Theorem.tex
 String
+	RollingHash.h
 	SuffixArray.h
 Flow
 	Dinic.h
