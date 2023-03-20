@@ -21,6 +21,7 @@ Math
 	FastPow.h
 	EXGCD.h
 	EXCRT.h
+	FFT.h
 	GeneratingFunctions.tex
 	Numbers.tex
 	Theorem.tex
