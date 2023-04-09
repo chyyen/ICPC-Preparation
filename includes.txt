@@ -3,9 +3,12 @@ Setup
 	vimrc.h
 Data-Structure
 	PBDS.h
+	SparseTable.h
 	LazyTagSegtree.h
 	LiChaoTree.h
 	Treap.h
+	DSU.h
+	RollbackDSU.h
 Graph
 	RoundSquareTree.h
 	SCC.h

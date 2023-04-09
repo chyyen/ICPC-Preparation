@@ -64,16 +64,54 @@
 #define mp make_pair
 #define mt make_tuple
 #define all(x) (x).begin(),(x).end()
+#define mem(x,i) memset((x),(i),sizeof((x)))
 using namespace std;
 //using namespace __gnu_pbds;
 using pii = pair<long long,long long>;
 using ld = long double;
 using ll = long long;
+mt19937 mtrd(chrono::steady_clock::now().time_since_epoch().count());
 const int mod = 1000000007;
 const int mod2 = 998244353;
 const ld PI = acos(-1);
 #define Bint __int128
 #define int long long
+namespace DEBUG {
+  template <typename T>
+  ostream& operator<<(ostream& os, const vector<T>& V) {
+    os << "[ ";
+    for (const auto& vv : V)
+      os << vv << ", ";
+    os << "]";
+    return os;
+  }
+  template <typename T>
+  inline void _debug(const char* format, T t) {
+    cerr << format << '=' << t << endl;
+  }
+  template <class First, class... Rest>
+  inline void _debug(const int idx, const char* format, First first, Rest... rest) {
+    if(idx == 1)
+      cerr << "DEBUG: ";
+    while (*format != ',')
+      cerr << *format++;
+    cerr << '=' << first << ",";
+    _debug(idx + 1, format + 1, rest...);
+  }
+  #define debug(...) _debug(#__VA_ARGS__, __VA_ARGS__)
+}  // namespace DEBUG
+using namespace DEBUG;
+/* ----------------------------------------  */
+void solve(){
+}
+signed main(){
+  ios::sync_with_stdio(0);
+  cin.tie(0);
+  int t = 1; 
+  //cin >> t;
+  while(t--)
+    solve();
+}
 \end{code}
 \subsection{vimrc}
 \begin{code}
@@ -98,6 +136,39 @@ gp_hash_table<T, T> h;
 tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update> tr;
 tr.order_of_key(x); // find x's ranking
 tr.find_by_order(k); // find k-th minimum, return iterator 
+\end{code}
+\subsection{SparseTable}
+\begin{code}
+template <class T, T (*op)(T, T), T id> struct SparseTable{
+  // idx: [0, n - 1]
+  int n;
+  vector<vector<T>>tbl;
+  T query(int l, int r){
+    int lg = __lg(r - l + 1);
+    return op(tbl[lg][l], tbl[lg][r - (1 << lg) + 1]);
+  }
+  SparseTable (): n(0) {}
+  SparseTable (int _n, vector<T>&arrr) {
+    n = _n;
+    int lg = __lg(n) + 2;
+    tbl.resize(lg, vector<T>(n + 5, id));
+    for(int i = 0; i < n; i++)
+      tbl[0][i] = arrr[i];
+    for(int i = 1; i <= lg; i++)
+      for(int j = 0; j + (1 << (i - 1)) < n; j++)
+        tbl[i][j] = op(tbl[i - 1][j], tbl[i - 1][j + (1 << (i - 1))]);
+  }
+  SparseTable (int _n, int *arrr) {
+    n = _n;
+    int lg = __lg(n) + 2;
+    tbl.resize(lg, vector<T>(n + 5, id));
+    for(int i = 0; i < n; i++)
+      tbl[0][i] = arrr[i];
+    for(int i = 1; i <= lg; i++)
+      for(int j = 0; j + (1 << (i - 1)) < n; j++)
+        tbl[i][j] = op(tbl[i - 1][j], tbl[i - 1][j + (1 << (i - 1))]);
+  }
+};
 \end{code}
 \subsection{LazyTagSegtree}
 \begin{code}
@@ -322,6 +393,70 @@ Treap *build(int n){
   traverse(st[0]);
   return st[0];
 }
+\end{code}
+\subsection{DSU}
+\begin{code}
+struct Disjoint_set{
+  int n;
+  vector<int>sz, p;
+  int fp(int x){
+    return (p[x] == -1 ? x : p[x] = fp(p[x]));
+  }
+  bool U(int x, int y){
+    x = fp(x), y = fp(y);
+    if(x == y)
+      return false;
+    if(sz[x] > sz[y])
+      swap(x, y);
+    p[x] = y;
+    sz[y] += sz[x];
+    return true;
+  }
+  Disjoint_set() {}
+  Disjoint_set(int _n){
+    n = _n;
+    sz.resize(n, 1);
+    p.resize(n, -1);
+  }
+};
+\end{code}
+\subsection{RollbackDSU}
+\begin{code}
+struct Rollback_DSU{
+  vector<int>p, sz;
+  vector<pair<int, int>>history;
+  int fp(int x){
+    while(p[x] != -1)
+      x = p[x];
+    return x;
+  }
+  bool U(int x, int y){
+    x = fp(x), y = fp(y);
+    if(x == y){
+      history.push_back(make_pair(-1, -1));
+      return false;
+    }
+    if(sz[x] > sz[y])
+      swap(x, y);
+    p[x] = y;
+    sz[y] += sz[x];
+    history.push_back(make_pair(x, y));
+    return true;
+  }
+  void undo(){
+    if(his.empty() || history.back().F == -1)
+      return;
+    auto [x, y] = history.back();
+    history.pop_back();
+    p[x] = -1;
+    sz[y] -= sz[x];
+  }
+  Rollback_DSU(): Rollback_DSU(0) {}
+  Rollback_DSU(int n): p(n), sz(n) {
+    fill(p.begin(), p.end(), -1);
+    fill(sz.begin(), sz.end(), 1);
+  }
+};
 \end{code}
 \section{Graph}
 \subsection{RoundSquareTree}
