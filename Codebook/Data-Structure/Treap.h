@@ -1,5 +1,3 @@
-mt19937 mtrd(chrono::steady_clock::now().time_since_epoch().count());
-
 struct Treap{
 	Treap *l, *r;
 	int pri, key, sz;

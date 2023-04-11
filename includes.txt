@@ -4,6 +4,7 @@ Setup
 Data-Structure
 	PBDS.h
 	SparseTable.h
+	SegmentTree.h
 	LazyTagSegtree.h
 	LiChaoTree.h
 	Treap.h
@@ -13,9 +14,11 @@ Graph
 	RoundSquareTree.h
 	SCC.h
 	2SAT.h
-	bridge.h
-	BronKerbosch_algorithm.h
+	Bridge.h
+	BronKerboschAlgorithm.h
 	Theorem.tex
+Tree
+	HLD.h
 String
 	RollingHash.h
 	SuffixArray.h

@@ -139,17 +139,19 @@ tr.find_by_order(k); // find k-th minimum, return iterator
 \end{code}
 \subsection{SparseTable}
 \begin{code}
-template <class T, T (*op)(T, T), T id> struct SparseTable{
+template <class T, T (*op)(T, T)> struct SparseTable{
   // idx: [0, n - 1]
   int n;
+  T id;
   vector<vector<T>>tbl;
   T query(int l, int r){
     int lg = __lg(r - l + 1);
     return op(tbl[lg][l], tbl[lg][r - (1 << lg) + 1]);
   }
   SparseTable (): n(0) {}
-  SparseTable (int _n, vector<T>&arrr) {
+  SparseTable (int _n, vector<T>&arrr, T _id) {
     n = _n;
+    id = _id;
     int lg = __lg(n) + 2;
     tbl.resize(lg, vector<T>(n + 5, id));
     for(int i = 0; i < n; i++)
@@ -158,8 +160,9 @@ template <class T, T (*op)(T, T), T id> struct SparseTable{
       for(int j = 0; j + (1 << (i - 1)) < n; j++)
         tbl[i][j] = op(tbl[i - 1][j], tbl[i - 1][j + (1 << (i - 1))]);
   }
-  SparseTable (int _n, int *arrr) {
+  SparseTable (int _n, T *arrr, T _id) {
     n = _n;
+    id = _id;
     int lg = __lg(n) + 2;
     tbl.resize(lg, vector<T>(n + 5, id));
     for(int i = 0; i < n; i++)
@@ -167,6 +170,45 @@ template <class T, T (*op)(T, T), T id> struct SparseTable{
     for(int i = 1; i <= lg; i++)
       for(int j = 0; j + (1 << (i - 1)) < n; j++)
         tbl[i][j] = op(tbl[i - 1][j], tbl[i - 1][j + (1 << (i - 1))]);
+  }
+};
+\end{code}
+\subsection{SegmentTree}
+\begin{code}
+template <class T, T (*op)(T, T)> struct Segment_tree{
+  int L, R;
+  T id;
+  vector<T>seg;
+  void _modify(int p, T v, int l, int r, int idx = 1){
+    assert(p <= r && p >= l);
+    if(l == r){
+      seg[idx] = v;
+      return;
+    }
+    int mid = (l + r) >> 1;
+    if(p <= mid)
+      _modify(p, v, l, mid, idx << 1);
+    else 
+      _modify(p, v, mid + 1, r, idx << 1 | 1);
+    seg[idx] = op(seg[idx << 1], seg[idx << 1 | 1]);
+  }
+  T _query(int ql, int qr, int l, int r, int idx = 1){
+    if(ql == l && qr == r)
+      return seg[idx];
+    int mid = (l + r) >> 1;
+    if(qr <= mid)
+      return _query(ql, qr, l, mid, idx << 1);
+    else if(ql > mid)
+      return _query(ql, qr, mid + 1, r, idx << 1 | 1);
+    return op(_query(ql, mid, l, mid, idx << 1), _query(mid + 1, qr, mid + 1, r, idx << 1 | 1));
+  }
+  void modify(int p, T v){ _modify(p, v, L, R, 1); }
+  T query(int l, int r){ return _query(l, r, L, R, 1); }
+  Segment_tree(): Segment_tree(0, 0, 0) {}
+  Segment_tree(int l, int r, T _id): L(l), R(r) {
+    id = _id;
+    seg.resize(4 * (r - l + 10));
+    fill(seg.begin(), seg.end(), id);
   }
 };
 \end{code}
@@ -287,7 +329,6 @@ struct Li_Chao_Tree{
 }\end{code}
 \subsection{Treap}
 \begin{code}
-mt19937 mtrd(chrono::steady_clock::now().time_since_epoch().count());
 struct Treap{
   Treap *l, *r;
   int pri, key, sz;
@@ -569,7 +610,7 @@ struct two_sat{
   }
 };
 \end{code}
-\subsection{bridge}
+\subsection{Bridge}
 \begin{code}
 int dep[N], low[N];
 vector<int>G[N];
@@ -595,7 +636,7 @@ void tarjan(int x, int px){
   }
 }
 \end{code}
-\subsection{BronKerbosch_algorithm}
+\subsection{BronKerboschAlgorithm}
 \begin{code}
 vector<vector<int>>maximal_clique;
 int cnt, G[N][N], all[N][N], some[N][N], none[N][N];
@@ -644,6 +685,69 @@ void process(){
 \item Maximum independent set of $G =$ Maximum clique of the complement graph of $G$ . 
 \item A planar graph $G$ colored with three colors iff there exist a maximal clique $I$ such that $G - I$ is a bipartite. 
 \end{itemize}
+\section{Tree}
+\subsection{HLD}
+\begin{code}
+struct Heavy_light_decomposition{
+  int n;
+  int cnt;
+  vector<int>dep, sz, mx_son, fa, top;
+  vector<int>id, inv_id;
+  vector<vector<pii>>G;
+  void addEdge(int u, int v, int c){
+    G[u].push_back(make_pair(v, c));
+    G[v].push_back(make_pair(u, c));
+  }
+  void dfs1(int x, int px){
+    dep[x] = dep[px] + 1;
+    sz[x] = 1;
+    fa[x] = px;
+    for(auto [i, c] : G[x])if(i != px){
+      dfs1(i, x);
+      sz[x] += sz[i];
+      mx_son[x] = (sz[i] > sz[mx_son[x]] ? i : mx_son[x]);
+    }
+  }
+  void dfs2(int x, int root){
+    top[x] = root;
+    id[x] = ++cnt;
+    inv_id[cnt] = x;
+    if(mx_son[x])
+      dfs2(mx_son[x], root);
+    for(auto [i, c] : G[x]){
+      if(i != fa[x] && i != mx_son[x])
+        dfs2(i, i);
+    }
+  }
+  void decompose(){
+    dfs1(1, 0);
+    dfs2(1, 1);
+    // initialize data structure
+  }
+  int lca(int u, int v){
+    int mx = 0;
+    while(top[u] != top[v]){
+      if(dep[top[u]] < dep[top[v]])
+        swap(u, v);
+      u = fa[top[u]];
+    }
+    if(dep[u]>dep[v])
+      swap(u, v);
+    return u;
+  }
+  Heavy_light_decomposition(): Heavy_light_decomposition(0) {}
+  Heavy_light_decomposition(int _n): n(_n), cnt(0) {
+    dep.resize(_n + 1, 0);
+    sz.resize(_n + 1, 0);
+    mx_son.resize(_n + 1, 0);
+    fa.resize(_n + 1);
+    top.resize(_n + 1);
+    id.resize(_n + 1);
+    inv_id.resize(_n + 1);
+    G.resize(_n + 1, vector<pii>(0));
+  }
+};
+\end{code}
 \section{String}
 \subsection{RollingHash}
 \begin{code}
