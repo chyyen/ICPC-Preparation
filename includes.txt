@@ -22,6 +22,8 @@ Tree
 String
 	RollingHash.h
 	SuffixArray.h
+	KMP.h
+	Zvalue.h
 Flow
 	Dinic.h
 Math
