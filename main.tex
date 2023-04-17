@@ -748,6 +748,150 @@ struct Heavy_light_decomposition{
   }
 };
 \end{code}
+\section{Geometry}
+\subsection{Point}
+\begin{code}
+template<class T> struct Point {
+  T x, y;
+  Point(): x(0), y(0) {};
+  Point(T a, T b): x(a), y(b) {};
+  Point(pair<T, T>p): x(p.first), y(p.second) {};
+  Point operator + (const Point& rhs){ return Point(x + rhs.x, y + rhs.y); }
+  Point operator - (const Point& rhs){ return Point(x - rhs.x, y - rhs.y); }
+  Point operator * (const int& rhs){ return Point(x * rhs, y * rhs); }
+  Point operator / (const int& rhs){ return Point(x / rhs, y / rhs); }
+  T cross(Point rhs){ return x * rhs.y - y * rhs.x; }
+  T dot(Point rhs){ return x * rhs.x + y * rhs.y; }
+  T cross2(Point a, Point b){ // (a - this) cross (b - this)
+    return (a - *this).cross(b - *this);
+  }
+  T dot2(Point a, Point b){ // (a - this) dot (b - this)
+    return (a - *this).dot(b - *this);
+  }
+};
+\end{code}
+\subsection{Geometry}
+\begin{code}
+template<class T> int ori(Point<T>a, Point<T>b, Point<T>c){
+  // sign of (b - a) cross(c - a)
+  auto res = a.cross2(b, c);
+  // if type if double
+  // if(abs(res) <= eps)
+  if(res == 0) 
+    return 0;
+  return res > 0 ? 1 : -1;
+}
+template<class T> bool collinearity(Point<T>a, Point<T>b, Point<T>c){
+  // if type is double
+  // return abs(c.cross2(a,b)) <= eps;
+  return c.cross2(a, b) == 0;
+}
+template<class T> bool between(Point<T>a, Point<T>b, Point<T>c){
+  // check if c is between a, b
+  return collinearity(a, b, c) && c.dot2(a, b) <= 0;
+}
+template<class T> bool seg_intersect(Point<T>p1, Point<T>p2, Point<T>p3, Point<T>p4){
+  // seg (p1, p2), seg(p3, p4)
+  int a123 = ori(p1, p2, p3);
+  int a124 = ori(p1, p2, p4);
+  int a341 = ori(p3, p4, p1);
+  int a342 = ori(p3, p4, p2);
+  if(a123 == 0 && a124 == 0)
+    return between(p1, p2, p3) || between(p1, p2, p4) || between(p3, p4, p1) || between(p3, p4, p2);
+  return a123 * a124 <= 0 && a341 * a342 <= 0;
+}
+template<class T> Point<T> intersect_at(Point<T> a, Point<T> b, Point<T> c, Point<T> d) {
+  // line(a, b), line(c, d)
+  T a123 = a.cross(b, c);
+  T a124 = a.cross(b, d);
+  return (d * a123 - c * a124) / (a123 - a124);
+}
+template<class T> int point_in_convex_polygon(vector<Point<T>>& a, Point<T>p){
+  // 1: IN
+  // 0: OUT
+  // -1: ON
+  // the points of convex polygon must sort in counter-clockwise order
+  int n = a.size();
+  if(between(a[0], a[1], p) || between(a[0], a[n - 1], p))
+    return -1;
+  int l = 0, r = n - 1;
+  while(l <= r){
+    int mid = (l + r) >> 1;
+    auto a1 = a[0].cross2(a[mid], p);
+    auto a2 = a[0].cross2(a[(mid + 1) % n], p);
+    if(a1 >= 0 && a2 <= 0){
+      auto res = a[mid].cross2(a[(mid + 1) % n], p);
+      return res > 0 ? 1 : (res >= 0 ? -1 : 0);
+    }
+    else if(a1 < 0)
+      r = mid - 1;
+    else
+      l = mid + 1;
+  }
+  return 0;
+}
+template<class T> int point_in_simple_polygon(vector<Point<T>>&a, Point<T>p, Point<T>INF_point){
+  // 1: IN
+  // 0: ON
+  // -1: OUT
+  // a[i] must adjacent to a[(i + 1) % n] for all i
+  // collinearity(a[i], p, INF_point) must be false for all i
+  // we can let the slope of line(p, INF_point) be irrational (e.g. PI)
+  int ans = -1;
+  for(auto l = prev(a.end()), r = a.begin(); r != a.end(); l = r++){
+    if(between(*l, *r, p))
+      return 0;
+    if(seg_intersect(*l, *r, p, INF_point)){
+      ans *= -1;
+      if(collinearity(*l, p, INF_point))
+        assert(0);
+    }
+  }
+  return ans;
+}
+template<class T> T area(vector<Point<T>>&a){
+  // remember to divide 2 after calling this function
+  if(a.size() <= 1)
+    return 0;
+  T ans = 0;
+  for(auto  l = prev(a.end()), r = a.begin(); r != a.end(); l = r++)
+    ans += l->cross(*r);
+  return abs(ans);
+}
+\end{code}
+\subsection{ConvexHull}
+\begin{code}
+template<class T> vector<Point<T>> convex_hull(vector<Point<T>>&a){
+  int n  = a.size();
+  sort(a.begin(), a.end(), [](Point<T>p1, Point<T>p2){
+    if(p1.x == p2.x)
+      return p1.y < p2.y;
+    return p1.x < p2.x;
+  });
+  int m = 0, t = 1;
+  vector<Point<T>>ans;
+  auto addPoint = [&](const Point<T>p) {
+    while(m > t && ans[m - 2].cross2(ans[m - 1], p) <= 0)
+      ans.pop_back(), m--;
+    ans.push_back(p);
+    m++;
+  };
+  for(int i = 0; i < n; i++)
+    addPoint(a[i]);
+  t = m;
+  for(int i = n - 2; ~i; i--)
+    addPoint(a[i]);
+  if(a.size() > 1)
+    ans.pop_back();
+  return ans;
+}
+\end{code}
+\subsection{Theorem}
+\begin{itemize}
+\item Pick's theorem: Suppose that a polygon has integer coordinates for all of its vertices. Let 
+$i$ be the number of integer points interior to the polygon, $b$ be the number of integer points on its boundary (including both vertices and points along the sides). Then the area $A$ of this polygon is:
+$$ A = i + \frac{b}{2} - 1$$
+\end{itemize}
 \section{String}
 \subsection{RollingHash}
 \begin{code}
@@ -796,6 +940,9 @@ struct Suffix_Array{
   int n, m; // m is the range of s
   string s;
   vector<int>sa, rk, lcp;
+  // sa[i]: the i-th smallest suffix
+  // rk[i]: the rank of suffix i (i.e. s[i, n - 1])
+  // lcp[i]: the longest common prefix of sa[i] and sa[i - 1]
   Suffix_Array(): Suffix_Array(0, 0, "") {};
   Suffix_Array(int _n, int _m, string _s): n(_n), m(_m), sa(_n), rk(_n), lcp(_n), s(_s) {}
   void Sort(int k, vector<int>&bucket, vector<int>&idx, vector<int>&lst){
@@ -818,7 +965,7 @@ struct Suffix_Array{
   void build(){
     vector<int>idx(n), lst(n), bucket(max(n, m));
     for(int i = 0; i < n; i++)
-      bucket[lst[i] = (s[i] - 'a')]++; 
+      bucket[lst[i] = (s[i] - 'a')]++; // may change 
     for(int i = 1; i < m; i++)
       bucket[i] += bucket[i - 1];
     for(int i = n - 1; i >= 0; i--)
@@ -898,6 +1045,28 @@ struct KMP {
     }
   }
 };
+\end{code}
+\subsection{Trie}
+\begin{code}
+struct Node {
+  int hit = 0;
+  Node *next[26];
+  // 26 is the size of the set of characters
+  // a - z
+  Node(){
+    for(int i = 0; i < 26; i++)
+      next[i] = NULL;
+  }
+};
+void insert(string &s, Node *node){
+  // node cannot be null
+  for(char v : s){
+    if(node->next[v - 'a'] == NULL)
+      node->next[v - 'a'] = new Node;
+    node = node->next[v - 'a'];
+  }
+  node->hit++;
+}
 \end{code}
 \subsection{Zvalue}
 \begin{code}
@@ -1001,6 +1170,80 @@ struct Max_Flow{
     G.resize(_n + 5);
     dep.resize(_n + 5);
     iter.resize(_n + 5);
+  }
+};
+\end{code}
+\subsection{MCMF}
+\begin{code}
+struct MCMF{
+  struct Edge{
+    int from, to;
+    int cap, cost;
+    Edge(int f, int t, int ca, int co): from(f), to(t), cap(ca), cost(co) {}
+  };  
+  int n, s, t;
+  vector<Edge>edges;
+  vector<vector<int>>G;
+  vector<int>d;
+  vector<int>in_queue, prev_edge;
+  MCMF(){}
+  MCMF(int _n, int _s, int _t): n(_n), G(_n + 1), d(_n + 1), in_queue(_n + 1), prev_edge(_n + 1), s(_s), t(_t) {}
+  void addEdge(int u, int v, int cap, int cost){
+    G[u].push_back(edges.size());
+    edges.push_back(Edge(u, v, cap, cost));
+    G[v].push_back(edges.size());
+    edges.push_back(Edge(v, u, 0, -cost));
+  }
+  bool bfs(){
+    bool found = false;
+    fill(d.begin(), d.end(), (int)1e18+10);
+    fill(in_queue.begin(), in_queue.end(), false);
+    d[s] = 0;
+    in_queue[s] = true;
+    queue<int>q;
+    q.push(s);
+    while(!q.empty()){
+      int u = q.front();
+      q.pop();
+      if(u == t)
+        found = true;
+      in_queue[u] = false;
+      for(auto &id : G[u]){
+        Edge e = edges[id];
+        if(e.cap > 0 && d[u] + e.cost < d[e.to]){
+          d[e.to] = d[u] + e.cost;
+          prev_edge[e.to] = id;
+          if(!in_queue[e.to]){
+            in_queue[e.to] = true;
+            q.push(e.to);
+          }
+        }
+      }
+    }
+    return found;
+  }
+  pair<int, int>flow(){ 
+    // return (cap, cost)
+    int cap = 0, cost = 0;
+    while(bfs()){
+      int send = (int)1e18 + 10;
+      int u = t;
+      while(u != s){
+        Edge e = edges[prev_edge[u]];
+        send = min(send, e.cap);
+        u = e.from;
+      }
+      u = t;
+      while(u != s){
+        Edge &e = edges[prev_edge[u]];
+        e.cap -= send;
+        Edge &e2 = edges[prev_edge[u] ^ 1];
+        e2.cap += send;
+        u = e.from;
+      }
+      cap += send;
+      cost += send * d[t];
+    }
   }
 };
 \end{code}
