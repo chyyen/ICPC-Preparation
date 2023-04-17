@@ -19,13 +19,20 @@ Graph
 	Theorem.tex
 Tree
 	HLD.h
+Geometry
+	Point.h
+	Geometry.h
+	ConvexHull.h
+	Theorem.tex
 String
 	RollingHash.h
 	SuffixArray.h
 	KMP.h
+	Trie.h
 	Zvalue.h
 Flow
 	Dinic.h
+	MCMF.h
 Math
 	FastPow.h
 	EXGCD.h

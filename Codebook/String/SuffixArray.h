@@ -2,6 +2,9 @@ struct Suffix_Array{
 	int n, m; // m is the range of s
 	string s;
 	vector<int>sa, rk, lcp;
+	// sa[i]: the i-th smallest suffix
+	// rk[i]: the rank of suffix i (i.e. s[i, n - 1])
+	// lcp[i]: the longest common prefix of sa[i] and sa[i - 1]
 
 	Suffix_Array(): Suffix_Array(0, 0, "") {};
 	Suffix_Array(int _n, int _m, string _s): n(_n), m(_m), sa(_n), rk(_n), lcp(_n), s(_s) {}
@@ -26,7 +29,7 @@ struct Suffix_Array{
 	void build(){
 		vector<int>idx(n), lst(n), bucket(max(n, m));
 		for(int i = 0; i < n; i++)
-			bucket[lst[i] = (s[i] - 'a')]++; 
+			bucket[lst[i] = (s[i] - 'a')]++; // may change 
 		for(int i = 1; i < m; i++)
 			bucket[i] += bucket[i - 1];
 		for(int i = n - 1; i >= 0; i--)
