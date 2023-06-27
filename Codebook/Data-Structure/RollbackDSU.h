@@ -23,8 +23,11 @@ struct Rollback_DSU{
 	}
 
 	void undo(){
-		if(his.empty() || history.back().F == -1)
+		if(history.empty() || history.back().first == -1){
+			if(!history.empty())
+				history.pop_back();
 			return;
+		}
 		auto [x, y] = history.back();
 		history.pop_back();
 		p[x] = -1;

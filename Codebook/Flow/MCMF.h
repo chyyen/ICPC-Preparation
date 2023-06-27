@@ -72,5 +72,6 @@ struct MCMF{
 			cap += send;
 			cost += send * d[t];
 		}
+		return make_pair(cap, cost);
 	}
 };
