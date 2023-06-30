@@ -38,6 +38,7 @@ Math
 	EXGCD.h
 	EXCRT.h
 	FFT.h
+	NTT.h
 	GeneratingFunctions.tex
 	Numbers.tex
 	Theorem.tex
