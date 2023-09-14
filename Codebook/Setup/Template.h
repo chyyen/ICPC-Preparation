@@ -12,6 +12,12 @@
 #define all(x) (x).begin(),(x).end()
 #define mem(x,i) memset((x),(i),sizeof((x)))
  
+#define FOR(i,j,k) for (int i=(j); i<=(k); i++)
+#define F0R(i,j,k) for (int i=(j); i<(k); i++)
+#define REP(i) FOR(_,1,i)
+#define foreach(a,x) for (auto& a: x)
+
+ 
 using namespace std;
 //using namespace __gnu_pbds;
 using pii = pair<long long,long long>;

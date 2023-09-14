@@ -1,11 +1,14 @@
 Setup
 	Template.h
+	Template_ruru.h
+	debug.h
 	vimrc.h
 Data-Structure
 	PBDS.h
 	SparseTable.h
 	SegmentTree.h
 	LazyTagSegtree.h
+	LazyTagSegtree_ruru.h
 	LiChaoTree.h
 	Treap.h
 	DSU.h
@@ -19,10 +22,12 @@ Graph
 	Theorem.tex
 Tree
 	HLD.h
+	LCA.h
 Geometry
 	Point.h
 	Geometry.h
 	ConvexHull.h
+	MaximumDistance.h
 	Theorem.tex
 String
 	RollingHash.h
@@ -39,6 +44,9 @@ Math
 	EXCRT.h
 	FFT.h
 	NTT.h
+	MillerRain.h
+	PollardRho.h
+	XorBasis.h
 	GeneratingFunctions.tex
 	Numbers.tex
 	Theorem.tex

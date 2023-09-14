@@ -65,6 +65,10 @@
 #define mt make_tuple
 #define all(x) (x).begin(),(x).end()
 #define mem(x,i) memset((x),(i),sizeof((x)))
+#define FOR(i,j,k) for (int i=(j); i<=(k); i++)
+#define F0R(i,j,k) for (int i=(j); i<(k); i++)
+#define REP(i) FOR(_,1,i)
+#define foreach(a,x) for (auto& a: x)
 using namespace std;
 //using namespace __gnu_pbds;
 using pii = pair<long long,long long>;
@@ -122,6 +126,76 @@ signed main(){
   while(t--)
     solve();
 }
+\end{code}
+\subsection{Template_ruru}
+\begin{code}
+#include <bits/stdc++.h>
+#include <ext/pb_ds/assoc_container.hpp>
+using namespace std;
+using namespace __gnu_pbds;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef vector<int> vi;
+#define V vector
+#define sz(a) ((int)a.size())
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define pb push_back
+#define rsz resize
+#define mp make_pair
+#define mt make_tuple
+#define ff first
+#define ss second
+#define FOR(i,j,k) for (int i=(j); i<=(k); i++)
+#define F0R(i,j,k) for (int i=(j); i<(k); i++)
+#define REP(i) FOR(_,1,i)
+#define foreach(a,x) for (auto& a: x)
+template<class T> bool cmin(T& a, const T& b) {
+    return b < a ? a = b, 1 : 0; } // set a = min(a,b)
+template<class T> bool cmax(T& a, const T& b) {
+    return a < b ? a = b, 1 : 0; } // set a = max(a,b)
+ll cdiv(ll a, ll b) { return a/b+((a^b)>0&&a%b); }
+ll fdiv(ll a, ll b) { return a/b-((a^b)<0&&a%b); }
+#define roadroller ios::sync_with_stdio(0), cin.tie(0);
+#define de(x) cerr << #x << '=' << x << ", "
+#define dd cerr << '\n';
+\end{code}
+\subsection{debug}
+\begin{code}
+namespace DEBUG{ 
+  template <typename T, typename T2>
+  ostream& operator<<(ostream& os, const pair<T, T2>& pr) {
+    os << "( " << pr.first << ", " << pr.second << ")";
+    return os;
+  }
+  template <typename T>
+  inline void _printv(T l, T r){
+    cerr << "DEBUG: [ ";
+    for(; l != r; l++)
+      cerr << *l << ", ";
+    cerr << "]" << endl;
+  }
+  template <typename T>
+  inline void _debug(const char* format, T t) {
+    cerr << format << '=' << t << endl;
+  }
+  template <class First, class... Rest>
+  inline void _debug(const char* format, First first, Rest... rest) {
+    while (*format != ',')
+      cerr << *format++;
+    cerr << '=' << first << ",";
+    _debug(format + 1, rest...);
+  }
+  #define TEST
+  #ifdef TEST
+  #define printv(x, y) _printv(x, y)
+  #define debug(...) cerr << "DEBUG: ",_debug(#__VA_ARGS__, __VA_ARGS__)
+  #else
+  #define debug(...) void(0)
+  #define printv(x, y) void(0)
+  #endif
+}  // namespace DEBUG
+using namespace DEBUG;
 \end{code}
 \subsection{vimrc}
 \begin{code}
@@ -296,6 +370,48 @@ struct segment_tree{
       Increase(l, r, ql, qr, v);
   }
 };\end{code}
+\subsection{LazyTagSegtree_ruru}
+\begin{code}
+template<class T, int SZ> struct LazySeg { // SZ must be power of 2
+  const T ID{}; T cmb(T a, T b) { return a+b; }
+  T seg[2*SZ], lazy[2*SZ]; 
+  LazySeg() { 
+    F0R(i,0,2*SZ) seg[i] = lazy[i] = ID; 
+  }
+  /// modify values for current node
+  void push(int ind, int L, int R) { 
+    // dependent on operation
+    seg[ind] += (R-L+1)*lazy[ind]; 
+    if (L != R) F0R(i,0,2) lazy[2*ind+i] += lazy[ind]; /// prop to children
+    lazy[ind] = 0; 
+  }
+  void pull(int ind){
+    seg[ind]=cmb(seg[2*ind],seg[2*ind+1]);
+  }
+  void build() {
+    for (int i=SZ; i>0; i--) pull(i);
+  }
+  void upd(int lo,int hi,T inc,int ind=1,int L=0, int R=SZ-1) {
+    push(ind,L,R); 
+    if (hi < L || R < lo) return;
+    if (lo <= L && R <= hi) { 
+      lazy[ind] = inc; push(ind,L,R); return;
+    }
+    int M = (L+R)/2; 
+    upd(lo,hi,inc,2*ind,L,M); 
+    upd(lo,hi,inc,2*ind+1,M+1,R); 
+    pull(ind);
+  }
+  T query(int lo, int hi, int ind=1, int L=0, int R=SZ-1) {
+    push(ind,L,R);
+    if (lo > R || L > hi) return ID;
+    if (lo <= L && R <= hi) return seg[ind];
+    int M = (L+R)/2; 
+    return cmb(query(lo,hi,2*ind,L,M),
+      query(lo,hi,2*ind+1,M+1,R));
+  }
+};
+\end{code}
 \subsection{LiChaoTree}
 \begin{code}
 struct line{
@@ -701,63 +817,112 @@ void process(){
 \section{Tree}
 \subsection{HLD}
 \begin{code}
-struct Heavy_light_decomposition{
-  int n;
-  int cnt;
-  vector<int>dep, sz, mx_son, fa, top;
-  vector<int>id, inv_id;
-  vector<vector<pii>>G;
-  void addEdge(int u, int v, int c){
-    G[u].push_back(make_pair(v, c));
-    G[v].push_back(make_pair(u, c));
+/**
+ * Description: Heavy-Light Decomposition, add val to verts 
+   * and query sum in path/subtree.
+ * Time: any tree path is split into $O(\log N)$ parts
+ */
+// #include "LazySeg.h"
+template<int SZ, bool VALS_IN_EDGES> struct HLD { 
+  int N; vi adj[SZ];
+  int par[SZ], root[SZ], depth[SZ], sz[SZ], ti;
+  int pos[SZ]; vi rpos;
+  // rpos not used but could be useful
+  void ae(int x, int y) {
+    adj[x].pb(y), adj[y].pb(x);
   }
-  void dfs1(int x, int px){
-    dep[x] = dep[px] + 1;
-    sz[x] = 1;
-    fa[x] = px;
-    for(auto [i, c] : G[x])if(i != px){
-      dfs1(i, x);
-      sz[x] += sz[i];
-      mx_son[x] = (sz[i] > sz[mx_son[x]] ? i : mx_son[x]);
+  void dfsSz(int x) { 
+    sz[x] = 1; 
+    foreach(y, adj[x]) {
+      par[y] = x; depth[y] = depth[x]+1;
+      adj[y].erase(find(all(adj[y]),x));
+      /// remove parent from adj list
+      dfsSz(y); sz[x] += sz[y];
+      if (sz[y] > sz[adj[x][0]]) 
+        swap(y,adj[x][0]);
     }
   }
-  void dfs2(int x, int root){
-    top[x] = root;
-    id[x] = ++cnt;
-    inv_id[cnt] = x;
-    if(mx_son[x])
-      dfs2(mx_son[x], root);
-    for(auto [i, c] : G[x]){
-      if(i != fa[x] && i != mx_son[x])
-        dfs2(i, i);
+  void dfsHld(int x) {
+    pos[x] = ti++; rpos.pb(x);
+    foreach(y,adj[x]) {
+      root[y] = 
+        (y == adj[x][0] ? root[x] : y);
+      dfsHld(y); }
+  }
+  void init(int _N, int R = 0) { N = _N; 
+    par[R] = depth[R] = ti = 0; dfsSz(R); 
+    root[R] = R; dfsHld(R); 
+  }
+  int lca(int x, int y) {
+    for (; root[x] != root[y]; y = par[root[y]])
+      if (depth[root[x]] > depth[root[y]]) swap(x,y);
+    return depth[x] < depth[y] ? x : y;
+  }
+  /// int dist(int x, int y) { // # edges on path
+  ///   return depth[x]+depth[y]-2*depth[lca(x,y)]; }
+  LazySeg<ll,SZ> tree; // segtree for sum
+  template <class BinaryOp>
+  void processPath(int x, int y, BinaryOp op) {
+    for (; root[x] != root[y]; y = par[root[y]]) {
+      if (depth[root[x]] > depth[root[y]]) swap(x,y);
+      op(pos[root[y]],pos[y]); }
+    if (depth[x] > depth[y]) swap(x,y);
+    op(pos[x]+VALS_IN_EDGES,pos[y]); 
+  }
+  void modifyPath(int x, int y, int v) { 
+    processPath(x,y,[this,&v](int l, int r) { 
+      tree.upd(l,r,v); });
+  }
+  ll queryPath(int x, int y) { 
+    ll res = 0;
+    processPath(x,y,[this,&res](int l, int r) {
+      res += tree.query(l,r); });
+    return res;
+  }
+  void modifySubtree(int x, int v) { 
+    tree.upd(pos[x]+VALS_IN_EDGES,pos[x]+sz[x]-1,v);
+  }
+};
+\end{code}
+\subsection{LCA}
+\begin{code}
+template<class T, int SZ> struct LazySeg { // SZ must be power of 2
+  const T ID{}; T cmb(T a, T b) { return a+b; }
+  T seg[2*SZ], lazy[2*SZ]; 
+  LazySeg() { 
+    F0R(i,0,2*SZ) seg[i] = lazy[i] = ID; 
+  }
+  /// modify values for current node
+  void push(int ind, int L, int R) { 
+    // dependent on operation
+    seg[ind] += (R-L+1)*lazy[ind]; 
+    if (L != R) F0R(i,0,2) lazy[2*ind+i] += lazy[ind]; /// prop to children
+    lazy[ind] = 0; 
+  }
+  void pull(int ind){
+    seg[ind]=cmb(seg[2*ind],seg[2*ind+1]);
+  }
+  void build() {
+    for (int i=SZ; i>0; i--) pull(i);
+  }
+  void upd(int lo,int hi,T inc,int ind=1,int L=0, int R=SZ-1) {
+    push(ind,L,R); 
+    if (hi < L || R < lo) return;
+    if (lo <= L && R <= hi) { 
+      lazy[ind] = inc; push(ind,L,R); return;
     }
+    int M = (L+R)/2; 
+    upd(lo,hi,inc,2*ind,L,M); 
+    upd(lo,hi,inc,2*ind+1,M+1,R); 
+    pull(ind);
   }
-  void decompose(){
-    dfs1(1, 0);
-    dfs2(1, 1);
-    // initialize data structure
-  }
-  int lca(int u, int v){
-    int mx = 0;
-    while(top[u] != top[v]){
-      if(dep[top[u]] < dep[top[v]])
-        swap(u, v);
-      u = fa[top[u]];
-    }
-    if(dep[u]>dep[v])
-      swap(u, v);
-    return u;
-  }
-  Heavy_light_decomposition(): Heavy_light_decomposition(0) {}
-  Heavy_light_decomposition(int _n): n(_n), cnt(0) {
-    dep.resize(_n + 1, 0);
-    sz.resize(_n + 1, 0);
-    mx_son.resize(_n + 1, 0);
-    fa.resize(_n + 1);
-    top.resize(_n + 1);
-    id.resize(_n + 1);
-    inv_id.resize(_n + 1);
-    G.resize(_n + 1, vector<pii>(0));
+  T query(int lo, int hi, int ind=1, int L=0, int R=SZ-1) {
+    push(ind,L,R);
+    if (lo > R || L > hi) return ID;
+    if (lo <= L && R <= hi) return seg[ind];
+    int M = (L+R)/2; 
+    return cmb(query(lo,hi,2*ind,L,M),
+      query(lo,hi,2*ind+1,M+1,R));
   }
 };
 \end{code}
@@ -896,6 +1061,20 @@ template<class T> vector<Point<T>> convex_hull(vector<Point<T>>&a){
     addPoint(a[i]);
   if(a.size() > 1)
     ans.pop_back();
+  return ans;
+}
+\end{code}
+\subsection{MaximumDistance}
+\begin{code}
+template<class T>
+T MaximumDistance(vector<Point<T>>&p){
+  vector<Point<T>>C = convex_hull(p);
+  int n = C.size(),t = 2;
+  T ans = 0;
+  for(int i = 0;i<n;i++){
+    while(((C[i] - C[t]) ^ (C[(i+1)%n] - C[t])) < ((C[i] - C[(t+1)%n]) ^ (C[(i+1)%n] - C[(t+1)%n]))) t = (t + 1)%n;
+    ans = max({ans, abs2(C[i] - C[t]), abs2(C[(i+1)%n] - C[t])});
+  }
   return ans;
 }
 \end{code}
@@ -1112,78 +1291,104 @@ struct Zvalue {
 \section{Flow}
 \subsection{Dinic}
 \begin{code}
-struct Max_Flow{
-  struct Edge{
-    int cap, to, rev;
-    Edge(){}
-    Edge(int _to, int _cap, int _rev){
-      to = _to, cap = _cap, rev = _rev;
+/**
+* After computing flow, edges $\{u,v\}$ s.t
+* $lev[u] \neq -1,$ $lev[v] = -1$ are part of min cut.
+* Use \texttt{reset} and \texttt{rcap} for Gomory-Hu.
+* Time: $O(N^2M)$ flow
+* $O(M\sqrt N)$ bipartite matching
+* $O(NM\sqrt N) or $O(NM\sqrtM) on unit graph.
+use rurutoria's template code
+ */
+struct Dinic {
+    using F = long long; // flow type
+    struct Edge { int to; F flo, cap; };
+    int N; 
+  vector<Edge> eds; 
+  vector<vector<int>> adj;
+    void init(int _N) {
+        N = _N; adj.resize(N), cur.resize(N);
     }
-  };
-  const int inf = 1e18+10;
-  int s, t; // start node and end node
-  vector<vector<Edge>>G;
-  vector<int>dep;
-  vector<int>iter;
-  void addE(int u, int v, int cap){
-    G[u].pb(Edge(v, cap, G[v].size()));
-    // direct graph
-    G[v].pb(Edge(u, 0, G[u].size() - 1));
-    // undirect graph
-    // G[v].pb(Edge(u, cap, G[u].size() - 1));
-  }
-  void bfs(){
-    queue<int>q;
-    q.push(s);
-    dep[s] = 0;
-    while(!q.empty()){
-      int cur = q.front();
-      q.pop();
-      for(auto i : G[cur]){
-        if(i.cap > 0 && dep[i.to] == -1){
-          dep[i.to] = dep[cur] + 1;
-          q.push(i.to);
+    void reset() {
+        for (auto &e: eds) e.flo = 0;
+    }
+    void ae(int u, int v, F cap, F rcap = 0) { 
+        assert(min(cap,rcap) >= 0);
+        adj[u].pb((int)eds.size()); 
+    eds.pb({v, 0, cap});
+        adj[v].pb((int)eds.size()); 
+    eds.pb({u, 0, rcap});
+    }
+    vector<int>lev;
+  vector<vector<int>::iterator> cur;
+    // level = shortest distance from source
+    bool bfs(int s, int t) {
+        lev = vi(N,-1);
+        F0R(i,0,N) cur[i] = begin(adj[i]);
+        queue<int> q({s}); lev[s] = 0;
+        while (sz(q)) { 
+            int u = q.front(); q.pop();
+            for (auto &e: adj[u]) { 
+                const Edge& E = eds[e];
+                int v = E.to; 
+                if (lev[v] < 0 && E.flo < E.cap)
+                    q.push(v), lev[v] = lev[u]+1;
+            }
         }
-      }
+        return lev[t] >= 0;
     }
-  }
-  int dfs(int x, int fl){
-    if(x == t)
-      return fl;
-    for(int _ = iter[x] ; _ < G[x].size() ; _++){
-      auto &i = G[x][_];
-      if(i.cap > 0 && dep[i.to] == dep[x] + 1){
-        int res = dfs(i.to, min(fl, i.cap));
-        if(res <= 0)
-          continue;
-        i.cap -= res;
-        G[i.to][i.rev].cap += res;
-        return res;
-      }
-      iter[x]++;
+    F dfs(int v, int t, F flo) {
+        if (v == t) return flo;
+        for (; cur[v] != end(adj[v]); cur[v]++) {
+            Edge& E = eds[*cur[v]];
+            if (lev[E.to]!=lev[v]+1||E.flo==E.cap) continue;
+            F df = dfs(E.to,t,min(flo,E.cap-E.flo));
+            if (df) {
+                E.flo += df;
+                eds[*cur[v]^1].flo -= df;
+                return df;
+            } // saturated >=1 one edge
+        }
+        return 0;
     }
-    return 0;
-  }
-  int Dinic(){
-    int res = 0;
-    while(true){
-      fill(all(dep), -1);
-      fill(all(iter), 0);
-      bfs();
-      if(dep[t] == -1)
-        break;
-      int cur;
-      while((cur = dfs(s, INF)) > 0)
-        res += cur;
+    F maxFlow(int s, int t) {
+        F tot = 0;
+        while (bfs(s,t)) while (F df =
+      dfs(s,t,numeric_limits<F>::max()))
+        tot += df;
+        return tot;
     }
-    return res;
-  }
-  void init(int _n, int _s, int _t){
-    s = _s, t = _t;
-    G.resize(_n + 5);
-    dep.resize(_n + 5);
-    iter.resize(_n + 5);
-  }
+    int fp(int u, int t,F f, vi &path, V<F> &flo, vi &vis) {
+        vis[u] = 1;
+        if (u == t) {
+            path.pb(u);
+            return f;
+        }
+        for (auto eid: adj[u]) {
+            auto &e = eds[eid];
+            F w = e.flo - flo[eid];
+            if (w <= 0 || vis[e.to]) continue;
+            w = fp(e.to, t, 
+        min(w, f), path, flo, vis);
+            if (w) {
+                flo[eid] += w, path.pb(u);
+                return w;
+            }
+        }
+        return 0;
+    }
+  // return collection of {bottleneck, path[]}
+    V<pair<F, vi>> allPath(int s, int t) { 
+        V<pair<F, vi>> res; V<F> flo(sz(eds));
+    vi vis;
+        do res.pb(mp(0, vi()));
+        while (res.back().ff = 
+      fp(s, t, numeric_limits<F>::max(),
+      res.back().ss, flo, vis=vi(N))
+    );
+        for (auto &p: res) reverse(all(p.ss));
+        return res.pop_back(), res;
+    }
 };
 \end{code}
 \subsection{MCMF}
@@ -1451,6 +1656,142 @@ struct NTT {
       res[i] = mul(a[i], b[i]);
     apply(res, n, 1);
     return res;
+  }
+};
+\end{code}
+\subsection{MillerRain}
+\begin{code}
+bool is_prime(long long n, vector<long long> x) {
+  long long d = n - 1;
+  d >>= __builtin_ctzll(d);
+  for(auto a : x) {
+    if(n <= a) break;
+    long long t = d, y = 1, b = t;
+    while(b) {
+      if(b & 1) y = __int128(y) * a % n;
+      a = __int128(a) * a % n;
+      b >>= 1;
+    }
+    while(t != n - 1 && y != 1 && y != n - 1) {
+      y = __int128(y) * y % n;
+      t <<= 1;
+    }
+    if(y != n - 1 && t % 2 == 0) return 0;
+  }
+  return 1;
+}
+bool is_prime(long long n) {
+  if(n <= 1) return 0;
+  if(n % 2 == 0) return n == 2;
+  if(n < (1LL << 30)) return is_prime(n, {2, 7, 61});
+  return is_prime(n, {2, 325, 9375, 28178, 450775, 9780504, 1795265022});
+}
+\end{code}
+\subsection{PollardRho}
+\begin{code}
+void PollardRho(map<long long, int>& mp, long long n) {
+  if(n == 1) return;
+  if(is_prime(n)) return mp[n]++, void();
+  if(n % 2 == 0) {
+    mp[2] += 1;
+    PollardRho(mp, n / 2);
+    return;
+  }
+  ll x = 2, y = 2, d = 1, p = 1;
+  #define f(x, n, p) ((__int128(x) * x % n + p) % n)
+  while(1) {
+    if(d != 1 && d != n) {
+      PollardRho(mp, d);
+      PollardRho(mp, n / d);
+      return;
+    }
+    p += (d == n);
+    x = f(x, n, p), y = f(f(y, n, p), n, p);
+    d = __gcd(abs(x - y), n);
+  }
+  #undef f
+}
+vector<long long> get_divisors(long long n) {
+  if(n == 0) return {};
+  map<long long, int> mp;
+  PollardRho(mp, n);
+  vector<pair<long long, int>> v(mp.begin(), mp.end());
+  vector<long long> res;
+  auto f = [&](auto f, int i, long long x) -> void {
+    if(i == (int)v.size()) {
+      res.pb(x);
+      return;
+    }
+    for(int j = v[i].second; ; j--) {
+      f(f, i + 1, x);
+      if(j == 0) break;
+      x *= v[i].first;
+    }
+  };
+  f(f, 0, 1);
+  sort(res.begin(), res.end());
+  return res;
+}
+\end{code}
+\subsection{XorBasis}
+\begin{code}
+template<int LOG> struct XorBasis {
+  bool zero = false;
+  int cnt = 0;
+  ll p[LOG] = {};
+  vector<ll> d;
+  void insert(ll x) {
+    for(int i = LOG - 1; i >= 0; --i) {
+      if(x >> i & 1) {
+        if(!p[i]) {
+          p[i] = x;
+          cnt += 1;
+          return;
+        } else x ^= p[i];
+      }
+    }
+    zero = true;
+  }
+  ll get_max() {
+    ll ans = 0;
+    for(int i = LOG - 1; i >= 0; --i) {
+      if((ans ^ p[i]) > ans) ans ^= p[i];
+    }
+    return ans;
+  }
+  ll get_min() {
+    if(zero) return 0;
+    for(int i = 0; i < LOG; ++i) {
+      if(p[i]) return p[i];
+    }
+  }
+  bool include(ll x) {
+    for(int i = LOG - 1; i >= 0; --i) {
+      if(x >> i & 1) x ^= p[i];
+    }
+    return x == 0;
+  }
+  void update() {
+    d.clear();
+    for(int j = 0; j < LOG; ++j) {
+      for(int i = j - 1; i >= 0; --i) {
+        if(p[j] >> i & 1) p[j] ^= p[i];
+      }
+    }
+    for(int i = 0; i < LOG; ++i) {
+      if(p[i]) d.PB(p[i]);
+    }
+  }
+  ll get_kth(ll k) {
+    if(k == 1 && zero) return 0;
+    if(zero) k -= 1;
+    if(k >= (1LL << cnt)) return -1;
+    update();
+    ll ans = 0;
+    for(int i = 0; i < SZ(d); ++i) {
+      if(k >> i & 1) ans ^= d[i];
+    }
+    return ans;
   }
 };
 \end{code}

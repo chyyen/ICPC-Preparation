@@ -1,65 +1,69 @@
-struct Heavy_light_decomposition{
-	int n;
-	int cnt;
-	vector<int>dep, sz, mx_son, fa, top;
-	vector<int>id, inv_id;
-	vector<vector<pii>>G;
+/**
+ * Description: Heavy-Light Decomposition, add val to verts 
+ 	* and query sum in path/subtree.
+ * Time: any tree path is split into $O(\log N)$ parts
+ */
 
-	void addEdge(int u, int v, int c){
-		G[u].push_back(make_pair(v, c));
-		G[v].push_back(make_pair(u, c));
+
+// #include "LazySeg.h"
+
+template<int SZ, bool VALS_IN_EDGES> struct HLD { 
+	int N; vi adj[SZ];
+	int par[SZ], root[SZ], depth[SZ], sz[SZ], ti;
+	int pos[SZ]; vi rpos;
+	// rpos not used but could be useful
+	void ae(int x, int y) {
+		adj[x].pb(y), adj[y].pb(x);
 	}
-
-	void dfs1(int x, int px){
-		dep[x] = dep[px] + 1;
-		sz[x] = 1;
-		fa[x] = px;
-		for(auto [i, c] : G[x])if(i != px){
-			dfs1(i, x);
-			sz[x] += sz[i];
-			mx_son[x] = (sz[i] > sz[mx_son[x]] ? i : mx_son[x]);
+	void dfsSz(int x) { 
+		sz[x] = 1; 
+		foreach(y, adj[x]) {
+			par[y] = x; depth[y] = depth[x]+1;
+			adj[y].erase(find(all(adj[y]),x));
+			/// remove parent from adj list
+			dfsSz(y); sz[x] += sz[y];
+			if (sz[y] > sz[adj[x][0]]) 
+				swap(y,adj[x][0]);
 		}
 	}
-	 
-	void dfs2(int x, int root){
-		top[x] = root;
-		id[x] = ++cnt;
-		inv_id[cnt] = x;
-		if(mx_son[x])
-			dfs2(mx_son[x], root);
-		for(auto [i, c] : G[x]){
-			if(i != fa[x] && i != mx_son[x])
-				dfs2(i, i);
-		}
+	void dfsHld(int x) {
+		pos[x] = ti++; rpos.pb(x);
+		foreach(y,adj[x]) {
+			root[y] = 
+				(y == adj[x][0] ? root[x] : y);
+			dfsHld(y); }
 	}
-	 
-	void decompose(){
-		dfs1(1, 0);
-		dfs2(1, 1);
-		// initialize data structure
+	void init(int _N, int R = 0) { N = _N; 
+		par[R] = depth[R] = ti = 0; dfsSz(R); 
+		root[R] = R; dfsHld(R); 
 	}
-	 
-	int lca(int u, int v){
-		int mx = 0;
-		while(top[u] != top[v]){
-			if(dep[top[u]] < dep[top[v]])
-				swap(u, v);
-			u = fa[top[u]];
-		}
-		if(dep[u]>dep[v])
-			swap(u, v);
-		return u;
+	int lca(int x, int y) {
+		for (; root[x] != root[y]; y = par[root[y]])
+			if (depth[root[x]] > depth[root[y]]) swap(x,y);
+		return depth[x] < depth[y] ? x : y;
 	}
-
-	Heavy_light_decomposition(): Heavy_light_decomposition(0) {}
-	Heavy_light_decomposition(int _n): n(_n), cnt(0) {
-		dep.resize(_n + 1, 0);
-		sz.resize(_n + 1, 0);
-		mx_son.resize(_n + 1, 0);
-		fa.resize(_n + 1);
-		top.resize(_n + 1);
-		id.resize(_n + 1);
-		inv_id.resize(_n + 1);
-		G.resize(_n + 1, vector<pii>(0));
+	/// int dist(int x, int y) { // # edges on path
+	/// 	return depth[x]+depth[y]-2*depth[lca(x,y)]; }
+	LazySeg<ll,SZ> tree; // segtree for sum
+	template <class BinaryOp>
+	void processPath(int x, int y, BinaryOp op) {
+		for (; root[x] != root[y]; y = par[root[y]]) {
+			if (depth[root[x]] > depth[root[y]]) swap(x,y);
+			op(pos[root[y]],pos[y]); }
+		if (depth[x] > depth[y]) swap(x,y);
+		op(pos[x]+VALS_IN_EDGES,pos[y]); 
+	}
+	void modifyPath(int x, int y, int v) { 
+		processPath(x,y,[this,&v](int l, int r) { 
+			tree.upd(l,r,v); });
+	}
+	ll queryPath(int x, int y) { 
+		ll res = 0;
+		processPath(x,y,[this,&res](int l, int r) {
+			res += tree.query(l,r); });
+		return res;
+	}
+	void modifySubtree(int x, int v) { 
+		tree.upd(pos[x]+VALS_IN_EDGES,pos[x]+sz[x]-1,v);
 	}
 };
