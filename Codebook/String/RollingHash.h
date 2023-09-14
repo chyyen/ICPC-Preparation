@@ -8,18 +8,18 @@ struct Rolling_Hash{
 	Rolling_Hash(string s): n(s.size()){
 		for(int i = 0; i < 5; i++){
 			PW[i].resize(n), pre[i].resize(n), suf[i].resize(n);
-			PW[i][0] = 1, pre[i][0] = s[0] - 'a';
-			suf[i][n - 1] = s[n - 1] - 'a';
+			PW[i][0] = 1, pre[i][0] = s[0];
+			suf[i][n - 1] = s[n - 1];
 		}
 		for(int i = 1; i < n; i++){
 			for(int j = 0; j < 5; j++){
 				PW[j][i] = PW[j][i - 1] * P[j] % M[j];
-				pre[j][i] = (pre[j][i - 1] * P[j] + s[i] - 'a') % M[j];
+				pre[j][i] = (pre[j][i - 1] * P[j] + s[i]) % M[j];
 			}
 		}
 		for(int i = n - 2; i >= 0; i--){
 			for(int j = 0; j < 5; j++)
-				suf[j][i] = (suf[j][i + 1] * P[j] + s[i] - 'a') % M[j];
+				suf[j][i] = (suf[j][i + 1] * P[j] + s[i]) % M[j];
 		}
 	}
 
