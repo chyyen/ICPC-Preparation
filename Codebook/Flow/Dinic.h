@@ -1,74 +1,101 @@
-struct Max_Flow{
-	struct Edge{
-		int cap, to, rev;
-		Edge(){}
-		Edge(int _to, int _cap, int _rev){
-			to = _to, cap = _cap, rev = _rev;
-		}
-	};
-	const int inf = 1e18+10;
-	int s, t; // start node and end node
-	vector<vector<Edge>>G;
-	vector<int>dep;
-	vector<int>iter;
-	void addE(int u, int v, int cap){
-		G[u].pb(Edge(v, cap, G[v].size()));
-		// direct graph
-    G[v].pb(Edge(u, 0, G[u].size() - 1));
-    // undirect graph
-    // G[v].pb(Edge(u, cap, G[u].size() - 1));
-  }
-	void bfs(){
-		queue<int>q;
-		q.push(s);
-		dep[s] = 0;
-		while(!q.empty()){
-			int cur = q.front();
-			q.pop();
-			for(auto i : G[cur]){
-				if(i.cap > 0 && dep[i.to] == -1){
-					dep[i.to] = dep[cur] + 1;
-					q.push(i.to);
-				}
-			}
-		}
-	}
-	int dfs(int x, int fl){
-		if(x == t)
-			return fl;
-		for(int _ = iter[x] ; _ < G[x].size() ; _++){
-			auto &i = G[x][_];
-			if(i.cap > 0 && dep[i.to] == dep[x] + 1){
-				int res = dfs(i.to, min(fl, i.cap));
-				if(res <= 0)
-					continue;
-				i.cap -= res;
-				G[i.to][i.rev].cap += res;
-				return res;
-			}
-			iter[x]++;
-		}
-		return 0;
-	}
-	int Dinic(){
-		int res = 0;
-		while(true){
-			fill(all(dep), -1);
-			fill(all(iter), 0);
-			bfs();
-			if(dep[t] == -1)
-				break;
-			int cur;
-			while((cur = dfs(s, INF)) > 0)
-				res += cur;
-		}
-		return res;
-	}
+/**
+* After computing flow, edges $\{u,v\}$ s.t
+* $lev[u] \neq -1,$ $lev[v] = -1$ are part of min cut.
+* Use \texttt{reset} and \texttt{rcap} for Gomory-Hu.
+* Time: $O(N^2M)$ flow
+* $O(M\sqrt N)$ bipartite matching
+* $O(NM\sqrt N) or $O(NM\sqrtM) on unit graph.
 
-	void init(int _n, int _s, int _t){
-		s = _s, t = _t;
-		G.resize(_n + 5);
-		dep.resize(_n + 5);
-		iter.resize(_n + 5);
-	}
+use rurutoria's template code
+ */
+
+struct Dinic {
+    using F = long long; // flow type
+    struct Edge { int to; F flo, cap; };
+    int N; 
+	vector<Edge> eds; 
+	vector<vector<int>> adj;
+    void init(int _N) {
+        N = _N; adj.resize(N), cur.resize(N);
+    }
+    void reset() {
+        for (auto &e: eds) e.flo = 0;
+    }
+    void ae(int u, int v, F cap, F rcap = 0) { 
+        assert(min(cap,rcap) >= 0);
+        adj[u].pb((int)eds.size()); 
+		eds.pb({v, 0, cap});
+        adj[v].pb((int)eds.size()); 
+		eds.pb({u, 0, rcap});
+    }
+    vector<int>lev;
+	vector<vector<int>::iterator> cur;
+    // level = shortest distance from source
+    bool bfs(int s, int t) {
+        lev = vi(N,-1);
+        F0R(i,0,N) cur[i] = begin(adj[i]);
+        queue<int> q({s}); lev[s] = 0;
+        while (sz(q)) { 
+            int u = q.front(); q.pop();
+            for (auto &e: adj[u]) { 
+                const Edge& E = eds[e];
+                int v = E.to; 
+                if (lev[v] < 0 && E.flo < E.cap)
+                    q.push(v), lev[v] = lev[u]+1;
+            }
+        }
+        return lev[t] >= 0;
+    }
+    F dfs(int v, int t, F flo) {
+        if (v == t) return flo;
+        for (; cur[v] != end(adj[v]); cur[v]++) {
+            Edge& E = eds[*cur[v]];
+            if (lev[E.to]!=lev[v]+1||E.flo==E.cap) continue;
+            F df = dfs(E.to,t,min(flo,E.cap-E.flo));
+            if (df) {
+                E.flo += df;
+                eds[*cur[v]^1].flo -= df;
+                return df;
+            } // saturated >=1 one edge
+        }
+        return 0;
+    }
+    F maxFlow(int s, int t) {
+        F tot = 0;
+        while (bfs(s,t)) while (F df =
+			dfs(s,t,numeric_limits<F>::max()))
+				tot += df;
+        return tot;
+    }
+    int fp(int u, int t,F f, vi &path, V<F> &flo, vi &vis) {
+        vis[u] = 1;
+        if (u == t) {
+            path.pb(u);
+            return f;
+        }
+        for (auto eid: adj[u]) {
+            auto &e = eds[eid];
+            F w = e.flo - flo[eid];
+            if (w <= 0 || vis[e.to]) continue;
+            w = fp(e.to, t, 
+				min(w, f), path, flo, vis);
+            if (w) {
+                flo[eid] += w, path.pb(u);
+                return w;
+            }
+        }
+        return 0;
+    }
+	// return collection of {bottleneck, path[]}
+    V<pair<F, vi>> allPath(int s, int t) { 
+        V<pair<F, vi>> res; V<F> flo(sz(eds));
+		vi vis;
+        do res.pb(mp(0, vi()));
+        while (res.back().ff = 
+			fp(s, t, numeric_limits<F>::max(),
+			res.back().ss, flo, vis=vi(N))
+		);
+        for (auto &p: res) reverse(all(p.ss));
+        return res.pop_back(), res;
+    }
 };
