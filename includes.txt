@@ -1,7 +1,6 @@
 Setup
 	Template.h
 	Template_ruru.h
-	debug.h
 	vimrc.h
 Data-Structure
 	PBDS.h

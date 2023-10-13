@@ -64,11 +64,6 @@
 #define mp make_pair
 #define mt make_tuple
 #define all(x) (x).begin(),(x).end()
-#define mem(x,i) memset((x),(i),sizeof((x)))
-#define FOR(i,j,k) for (int i=(j); i<=(k); i++)
-#define F0R(i,j,k) for (int i=(j); i<(k); i++)
-#define REP(i) FOR(_,1,i)
-#define foreach(a,x) for (auto& a: x)
 using namespace std;
 //using namespace __gnu_pbds;
 using pii = pair<long long,long long>;
@@ -81,40 +76,22 @@ const int mod2 = 998244353;
 const ld PI = acos(-1);
 #define Bint __int128
 #define int long long
-namespace DEBUG{ 
-  template <typename T, typename T2>
-  ostream& operator<<(ostream& os, const pair<T, T2>& pr) {
-    os << "( " << pr.first << ", " << pr.second << ")";
-    return os;
-  }
-  template <typename T>
-  inline void _printv(T l, T r){
-    cerr << "DEBUG: [ ";
-    for(; l != r; l++)
-      cerr << *l << ", ";
-    cerr << "]" << endl;
-  }
-  template <typename T>
-  inline void _debug(const char* format, T t) {
-    cerr << format << '=' << t << endl;
-  }
-  template <class First, class... Rest>
-  inline void _debug(const char* format, First first, Rest... rest) {
-    while (*format != ',')
-      cerr << *format++;
-    cerr << '=' << first << ",";
-    _debug(format + 1, rest...);
-  }
-  #define TEST
-  #ifdef TEST
-  #define printv(x, y) _printv(x, y)
-  #define debug(...) cerr << "DEBUG: ",_debug(#__VA_ARGS__, __VA_ARGS__)
-  #else
-  #define debug(...) void(0)
-  #define printv(x, y) void(0)
-  #endif
-}  // namespace DEBUG
-using namespace DEBUG;
+template <typename T>
+inline void printv(T l, T r){
+  cerr << "[ ";
+  for(; l != r; l++)
+    cerr << *l << ", ";
+  cerr << "]" << endl;
+}
+#define TEST
+#ifdef TEST
+#define de(x) cerr << #x << '=' << x << ", "
+#define ed cerr << '\n';
+#else
+#define de(x) void(0)
+#define ed void(0)
+#define printv(...) void(0)
+#endif
 /* ----------------------------------------  */
 void solve(){
 }
@@ -160,58 +137,21 @@ ll fdiv(ll a, ll b) { return a/b-((a^b)<0&&a%b); }
 #define de(x) cerr << #x << '=' << x << ", "
 #define dd cerr << '\n';
 \end{code}
-\subsection{debug}
-\begin{code}
-namespace DEBUG{ 
-  template <typename T, typename T2>
-  ostream& operator<<(ostream& os, const pair<T, T2>& pr) {
-    os << "( " << pr.first << ", " << pr.second << ")";
-    return os;
-  }
-  template <typename T>
-  inline void _printv(T l, T r){
-    cerr << "DEBUG: [ ";
-    for(; l != r; l++)
-      cerr << *l << ", ";
-    cerr << "]" << endl;
-  }
-  template <typename T>
-  inline void _debug(const char* format, T t) {
-    cerr << format << '=' << t << endl;
-  }
-  template <class First, class... Rest>
-  inline void _debug(const char* format, First first, Rest... rest) {
-    while (*format != ',')
-      cerr << *format++;
-    cerr << '=' << first << ",";
-    _debug(format + 1, rest...);
-  }
-  #define TEST
-  #ifdef TEST
-  #define printv(x, y) _printv(x, y)
-  #define debug(...) cerr << "DEBUG: ",_debug(#__VA_ARGS__, __VA_ARGS__)
-  #else
-  #define debug(...) void(0)
-  #define printv(x, y) void(0)
-  #endif
-}  // namespace DEBUG
-using namespace DEBUG;
-\end{code}
 \subsection{vimrc}
 \begin{code}
 syntax on
 set mouse=a
 set nu
-set ts=4
-set sw=4
-set smartindent
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set autoindent
 set cursorline
-set hlsearch
-set incsearch
-set t_Co=256
-nnoremap y ggyG
-colorscheme afterglow
-au BufNewFile *.cpp 0r ~/default_code/default.cpp | let IndentStyle = "cpp"
+imap kj <Esc>
+imap {}} {<CR>}<Esc>ko<Tab>
+imap [] []<Esc>i
+imap () ()<Esc>i
+imap <> <><Esc>i
 \end{code}
 \section{Data-structure}
 \subsection{PBDS}
@@ -223,34 +163,30 @@ tr.find_by_order(k); // find k-th minimum, return iterator
 \end{code}
 \subsection{SparseTable}
 \begin{code}
-template <class T, T (*op)(T, T)> struct SparseTable{
+template <class T> struct SparseTable{
   // idx: [0, n - 1]
   int n;
   T id;
   vector<vector<T>>tbl;
+  T op(T lhs, T rhs){
+    // write your mege function  
+  }
   T query(int l, int r){
     int lg = __lg(r - l + 1);
     return op(tbl[lg][l], tbl[lg][r - (1 << lg) + 1]);
   }
   SparseTable (): n(0) {}
-  SparseTable (int _n, vector<T>&arrr, T _id) {
+  template<typename iter_t>  
+  SparseTable (int _n, iter_t l, iter_t r, T _id) {
     n = _n;
     id = _id;
     int lg = __lg(n) + 2;
     tbl.resize(lg, vector<T>(n + 5, id));
-    for(int i = 0; i < n; i++)
-      tbl[0][i] = arrr[i];
-    for(int i = 1; i <= lg; i++)
-      for(int j = 0; j + (1 << (i - 1)) < n; j++)
-        tbl[i][j] = op(tbl[i - 1][j], tbl[i - 1][j + (1 << (i - 1))]);
-  }
-  SparseTable (int _n, T *arrr, T _id) {
-    n = _n;
-    id = _id;
-    int lg = __lg(n) + 2;
-    tbl.resize(lg, vector<T>(n + 5, id));
-    for(int i = 0; i < n; i++)
-      tbl[0][i] = arrr[i];
+    iter_t ptr = l;
+    for(int i = 0; i < n; i++, ptr++){
+      assert(ptr != r);
+      tbl[0][i] = *ptr;
+    }
     for(int i = 1; i <= lg; i++)
       for(int j = 0; j + (1 << (i - 1)) < n; j++)
         tbl[i][j] = op(tbl[i - 1][j], tbl[i - 1][j + (1 << (i - 1))]);
@@ -259,10 +195,13 @@ template <class T, T (*op)(T, T)> struct SparseTable{
 \end{code}
 \subsection{SegmentTree}
 \begin{code}
-template <class T, T (*op)(T, T)> struct Segment_tree{
+template <class T> struct Segment_tree{
   int L, R;
   T id;
   vector<T>seg;
+  T op(T lhs, T rhs){
+    // write your merge function
+  }
   void _modify(int p, T v, int l, int r, int idx = 1){
     assert(p <= r && p >= l);
     if(l == r){
@@ -301,6 +240,7 @@ template <class T, T (*op)(T, T)> struct Segment_tree{
 struct segment_tree{
   int seg[N << 2];
   int tag1[N << 2], tag2[N << 2];
+  // careful when v can be negative
   void down(int l, int r, int idx, int pidx){
     int v = tag1[pidx], vv = tag2[pidx];
     if(v)
@@ -369,7 +309,8 @@ struct segment_tree{
     else
       Increase(l, r, ql, qr, v);
   }
-};\end{code}
+};
+\end{code}
 \subsection{LazyTagSegtree_ruru}
 \begin{code}
 template<class T, int SZ> struct LazySeg { // SZ must be power of 2
@@ -419,24 +360,22 @@ struct line{
   int val(int x){
     return m * x + c;
   }
-  line(){}
-  line(int _m, int _c){
-    m = _m, c = _c;
-  }
+  line(): m(_id), c(0) {} // _id is the identity element
+  line(int _m, int _c): m(_m), c(_c) {}
 };
 struct Li_Chao_Tree{
   line seg[N << 2];
   void ins(int l, int r, int idx, line x){
     if(l == r){
       if(x.val(l) > seg[idx].val(l))
-        seg[idx] = x;
+        seg[idx] = x; // change > to < when get min
       return;
     }
     int mid = (l + r) >> 1;
-    if(x.m < seg[idx].m)
+    if(x.m < seg[idx].m) // change < to > when get min
       swap(x, seg[idx]);
-    // ensure x.m > seg[idx].m
     if(seg[idx].val(mid) <= x.val(mid)){
+      // change <= to >= when get min
       swap(x, seg[idx]);
       ins(l, mid, idx << 1, x);
     }
@@ -447,12 +386,14 @@ struct Li_Chao_Tree{
     if(l == r)
       return seg[idx].val(l);
     int mid = (l + r) >> 1;
+    // change max to min when get min
     if(p <= mid)
       return max(seg[idx].val(p), query(l, mid, p, idx << 1));
     else
       return max(seg[idx].val(p), query(mid + 1, r, p, idx << 1 | 1));
   }
-}\end{code}
+}
+\end{code}
 \subsection{Treap}
 \begin{code}
 struct Treap{
@@ -582,8 +523,8 @@ struct Disjoint_set{
   Disjoint_set() {}
   Disjoint_set(int _n){
     n = _n;
-    sz.resize(n, 1);
-    p.resize(n, -1);
+    sz.resize(n + 5, 1);
+    p.resize(n + 5, -1);
   }
 };
 \end{code}
@@ -622,7 +563,7 @@ struct Rollback_DSU{
     sz[y] -= sz[x];
   }
   Rollback_DSU(): Rollback_DSU(0) {}
-  Rollback_DSU(int n): p(n), sz(n) {
+  Rollback_DSU(int n): p(n + 5), sz(n + 5) {
     fill(p.begin(), p.end(), -1);
     fill(sz.begin(), sz.end(), 1);
   }
