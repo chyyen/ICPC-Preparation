@@ -36,7 +36,7 @@ struct Rollback_DSU{
 
 	Rollback_DSU(): Rollback_DSU(0) {}
 
-	Rollback_DSU(int n): p(n), sz(n) {
+	Rollback_DSU(int n): p(n + 5), sz(n + 5) {
 		fill(p.begin(), p.end(), -1);
 		fill(sz.begin(), sz.end(), 1);
 	}

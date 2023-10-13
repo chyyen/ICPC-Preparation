@@ -2,6 +2,7 @@ struct segment_tree{
 	int seg[N << 2];
 	int tag1[N << 2], tag2[N << 2];
 
+	// careful when v can be negative
 	void down(int l, int r, int idx, int pidx){
 		int v = tag1[pidx], vv = tag2[pidx];
 		if(v)

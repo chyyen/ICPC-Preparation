@@ -1,7 +1,11 @@
-template <class T, T (*op)(T, T)> struct Segment_tree{
+template <class T> struct Segment_tree{
 	int L, R;
 	T id;
 	vector<T>seg;
+
+	T op(T lhs, T rhs){
+		// write your merge function
+	}
 
 	void _modify(int p, T v, int l, int r, int idx = 1){
 		assert(p <= r && p >= l);

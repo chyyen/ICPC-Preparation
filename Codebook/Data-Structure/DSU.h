@@ -20,7 +20,7 @@ struct Disjoint_set{
 	Disjoint_set() {}
 	Disjoint_set(int _n){
 		n = _n;
-		sz.resize(n, 1);
-		p.resize(n, -1);
+		sz.resize(n + 5, 1);
+		p.resize(n + 5, -1);
 	}
 };
