@@ -1,16 +1,14 @@
 syntax on
 set mouse=a
 set nu
-set ts=4
-set sw=4
-set smartindent
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set autoindent
 set cursorline
-set hlsearch
-set incsearch
-set t_Co=256
 
-nnoremap y ggyG
-
-colorscheme afterglow
-
-au BufNewFile *.cpp 0r ~/default_code/default.cpp | let IndentStyle = "cpp"
+imap kj <Esc>
+imap {}} {<CR>}<Esc>ko<Tab>
+imap [] []<Esc>i
+imap () ()<Esc>i
+imap <> <><Esc>i
