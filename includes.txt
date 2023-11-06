@@ -7,7 +7,6 @@ Data-Structure
 	SparseTable.h
 	SegmentTree.h
 	LazyTagSegtree.h
-	LazyTagSegtree_ruru.h
 	LiChaoTree.h
 	Treap.h
 	DSU.h

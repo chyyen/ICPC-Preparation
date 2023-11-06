@@ -10,6 +10,11 @@ $x^n     = \sum_{i=0}^{n} S(n, i) (x)_i$
 
 \item Catalan numbers
 
-$C_n = \frac{1}{n+1}\binom{2n}{n} = \binom{2n}{n}-\binom{2n}{n+1}\ , \forall n \geq 0 $
+$C_n = \frac{1}{n+1}{2n \choose n} = {2n \choose n}-\binom{2n \choose n+1}\ , \forall n \geq 0 $
 $C_{n+1} = \sum_{i=0}^{n} C_iC_{n-i} = \frac{2(2n+1)}{n+2}C_n,\ C_0 = 1$
+
+\item Hockey-stick identity
+
+$\sum_{i = r}^{n} {i \choose r} = {n + 1 \choose r + 1}$
+
 \end{itemize}

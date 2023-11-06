@@ -1,39 +1,38 @@
-template<class T, int SZ> struct LazySeg { // SZ must be power of 2
-	const T ID{}; T cmb(T a, T b) { return a+b; }
-	T seg[2*SZ], lazy[2*SZ]; 
-	LazySeg() { 
-		F0R(i,0,2*SZ) seg[i] = lazy[i] = ID; 
+int anc[20][N];
+int dis[20][N];
+int dep[N];
+vector<pair<int, int>>G[N]; // weighted(edge) tree
+ 
+void dfs(int u, int pu = 0){
+	for(int i = 1; i < 20; i++){
+		anc[i][u] = anc[i - 1][anc[i - 1][u]];
+		dis[i][u] = dis[i - 1][u] + dis[i - 1][anc[i - 1][u]];
 	}
-	/// modify values for current node
-	void push(int ind, int L, int R) { 
-		// dependent on operation
-		seg[ind] += (R-L+1)*lazy[ind]; 
-		if (L != R) F0R(i,0,2) lazy[2*ind+i] += lazy[ind]; /// prop to children
-		lazy[ind] = 0; 
+	for(auto [v, c] : G[u]){
+		if(v == pu)
+			continue;
+		dep[v] = dep[u] + 1;
+		anc[0][v] = u;
+		dis[0][v] = c;
+		dfs(v, u);
 	}
-	void pull(int ind){
-		seg[ind]=cmb(seg[2*ind],seg[2*ind+1]);
+}
+ 
+int LCA(int x, int y){
+	if(dep[x] < dep[y])
+		swap(x, y);
+	int diff = dep[x] - dep[y];
+	for(int i = 19; i >= 0; i--){
+		if(diff - (1 << i) >= 0)
+			x = anc[i][x], diff -= (1 << i);
 	}
-	void build() {
-		for (int i=SZ; i>0; i--) pull(i);
-	}
-	void upd(int lo,int hi,T inc,int ind=1,int L=0, int R=SZ-1) {
-		push(ind,L,R); 
-		if (hi < L || R < lo) return;
-		if (lo <= L && R <= hi) { 
-			lazy[ind] = inc; push(ind,L,R); return;
+	if(x == y)
+		return x;
+	for(int i = 19; i >= 0; i--){
+		if(anc[i][x] != anc[i][y]){
+			x = anc[i][x];
+			y = anc[i][y];
 		}
-		int M = (L+R)/2; 
-		upd(lo,hi,inc,2*ind,L,M); 
-		upd(lo,hi,inc,2*ind+1,M+1,R); 
-		pull(ind);
 	}
-	T query(int lo, int hi, int ind=1, int L=0, int R=SZ-1) {
-		push(ind,L,R);
-		if (lo > R || L > hi) return ID;
-		if (lo <= L && R <= hi) return seg[ind];
-		int M = (L+R)/2; 
-		return cmb(query(lo,hi,2*ind,L,M),
-			query(lo,hi,2*ind+1,M+1,R));
-	}
-};
+	return anc[0][x];
+}

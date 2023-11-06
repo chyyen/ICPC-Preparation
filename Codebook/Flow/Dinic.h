@@ -5,8 +5,6 @@
 * Time: $O(N^2M)$ flow
 * $O(M\sqrt N)$ bipartite matching
 * $O(NM\sqrt N) or $O(NM\sqrtM) on unit graph.
-
-use rurutoria's template code
  */
 
 struct Dinic {
@@ -32,10 +30,10 @@ struct Dinic {
 	vector<vector<int>::iterator> cur;
     // level = shortest distance from source
     bool bfs(int s, int t) {
-        lev = vi(N,-1);
-        F0R(i,0,N) cur[i] = begin(adj[i]);
+        lev = vector<int>(N,-1);
+        for(int i = 0; i < N; i++) cur[i] = begin(adj[i]);
         queue<int> q({s}); lev[s] = 0;
-        while (sz(q)) { 
+        while (!q.empty()) { 
             int u = q.front(); q.pop();
             for (auto &e: adj[u]) { 
                 const Edge& E = eds[e];
@@ -67,7 +65,7 @@ struct Dinic {
 				tot += df;
         return tot;
     }
-    int fp(int u, int t,F f, vi &path, V<F> &flo, vi &vis) {
+    int fp(int u, int t,F f, vector<int> &path, vector<F> &flo, vector<int> &vis) {
         vis[u] = 1;
         if (u == t) {
             path.pb(u);
@@ -87,15 +85,15 @@ struct Dinic {
         return 0;
     }
 	// return collection of {bottleneck, path[]}
-    V<pair<F, vi>> allPath(int s, int t) { 
-        V<pair<F, vi>> res; V<F> flo(sz(eds));
-		vi vis;
-        do res.pb(mp(0, vi()));
-        while (res.back().ff = 
+    vector<pair<F, vector<int>>> allPath(int s, int t) { 
+        vector<pair<F, vector<int>>> res; vector<F> flo((int)eds.size());
+		vector<int> vis;
+        do res.pb(mp(0, vector<int>()));
+        while (res.back().first = 
 			fp(s, t, numeric_limits<F>::max(),
-			res.back().ss, flo, vis=vi(N))
+			res.back().second, flo, vis=vector<int>(N))
 		);
-        for (auto &p: res) reverse(all(p.ss));
+        for (auto &p: res) reverse(all(p.second));
         return res.pop_back(), res;
     }
 };
