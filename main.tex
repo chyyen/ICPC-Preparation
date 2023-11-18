@@ -104,7 +104,7 @@ signed main(){
     solve();
 }
 \end{code}
-\subsection{Template_ruru}
+\subsection{TemplateRuru}
 \begin{code}
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
@@ -152,6 +152,15 @@ imap {}} {<CR>}<Esc>ko<Tab>
 imap [] []<Esc>i
 imap () ()<Esc>i
 imap <> <><Esc>i
+\end{code}
+\subsection{vimrc2}
+\begin{code}
+se nu ai hls et ru ic is sc cul
+se re=1 ts=4 sts=4 sw=4 ls=2 mouse=a
+syntax on
+hi cursorline cterm=none ctermbg=89
+set bg=dark
+map <F5> :w <CR> :!clear ; g++ -g --std=c++17 % && echo Compiled successfully. && ./a.out; <CR>
 \end{code}
 \section{Data-structure}
 \subsection{PBDS}
@@ -1671,6 +1680,51 @@ template<int LOG> struct XorBasis {
   }
 };
 \end{code}
+\subsection{XorGaussianElimination}
+\begin{code}
+pair<int, vector<bool>> GaussElimination(int n, int m)  {
+  // m = # of variable, n = # of equation, return solution of system
+  // X[0][0] + X[0][1] ... + X[0][m - 1] = X[0][m]
+  // ... to X[n - 1]
+  // has solution => return solution, no solution => return empty vector
+  int sol_num = 1;
+  vector<int>where(m, -1);
+  for(int col = 0, row = 0; col < m && row < n; col++){
+    for(int i = row; i < n; i++){
+      if(X[i][col]){
+        swap(X[i], X[row]);
+        break;
+      }
+    }
+    if(!X[row][col]){
+      sol_num = 2;
+      continue;
+    }
+    where[col] = row;
+    for(int i = 0; i < n; i++){
+      if(i != row && X[i][col])
+        X[i] ^= X[row];  
+    }
+    row++;
+  }
+  vector<bool>ans(m, 0);
+  for (int i = 0; i < m; i++){ //
+        if (where[i] != -1)
+            ans[i] = (X[where[i]][m] ? 1 : 0);
+  }
+    for (int i = 0; i < n; i++) {
+    bool sum = X[i][m];
+        for (int j = 0; j < m; j++)
+      sum ^= (X[i][j] && ans[j]);
+    if(sum)
+            return make_pair(0, vector<bool>(0));
+    }
+    for (int i = 0; i < m; i++)
+        if (where[i] == -1)
+      sol_num = 2;
+  return make_pair(sol_num, ans);
+}
+\end{code}
 \subsection{GeneratingFunctions}
 \begin{itemize}
 \item Ordinary Generating Function
@@ -1713,6 +1767,8 @@ $C_n = \frac{1}{n+1}{2n \choose n} = {2n \choose n}-\binom{2n \choose n+1}\ , \f
 $C_{n+1} = \sum_{i=0}^{n} C_iC_{n-i} = \frac{2(2n+1)}{n+2}C_n,\ C_0 = 1$
 \item Hockey-stick identity
 $\sum_{i = r}^{n} {i \choose r} = {n + 1 \choose r + 1}$
+\item Vandermonde identity
+${n + m \choose k} = \sum_{i = 0}^{k} {n \choose i} {m \choose k - i}
 \end{itemize}
 \subsection{Theorem}
 \begin{itemize}
@@ -1749,6 +1805,12 @@ A pair of sequences of nonnegative integers $a_1\ge\cdots\ge a_n$ and $b_1,\ldot
   \item $r$: sphere radius, $a$: radius of the base of the cap, $h$: height of the cap, $\theta$: $\arcsin(a/r)$.
   \item Volume $=\pi h^2(3r-h)/3=\pi h(3a^2+h^2)/6=\pi r^3(2+\cos\theta)(1-\cos\theta)^2/3$.
   \item Area $=2\pi rh=\pi(a^2+h^2)=2\pi r^2(1-\cos\theta)$.
+\end{itemize}
+\item Number of triangle when the longest edge is $x$ (if two triangles are considered the same if they are 全等)
+\begin{itemize}
+    \itemsep-0.5em
+  \item if $x$ is even, then $f(x) = \frac{x \times (x + 2)}{4}$
+  \item if $x$ is odd, then $f(x) = \frac{(x + 1)^2}{4}$
 \end{itemize}
 \end{itemize}
 \end{document}

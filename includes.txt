@@ -1,7 +1,8 @@
 Setup
 	Template.h
-	Template_ruru.h
+	TemplateRuru.h
 	vimrc.h
+	vimrc2.h
 Data-Structure
 	PBDS.h
 	SparseTable.h
@@ -45,6 +46,7 @@ Math
 	MillerRain.h
 	PollardRho.h
 	XorBasis.h
+	XorGaussianElimination.h
 	GeneratingFunctions.tex
 	Numbers.tex
 	Theorem.tex
