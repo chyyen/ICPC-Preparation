@@ -822,8 +822,8 @@ template<class T> struct Point {
   Point(pair<T, T>p): x(p.first), y(p.second) {};
   Point operator + (const Point& rhs){ return Point(x + rhs.x, y + rhs.y); }
   Point operator - (const Point& rhs){ return Point(x - rhs.x, y - rhs.y); }
-  Point operator * (const int& rhs){ return Point(x * rhs, y * rhs); }
-  Point operator / (const int& rhs){ return Point(x / rhs, y / rhs); }
+  Point operator * (const T& rhs){ return Point(x * rhs, y * rhs); }
+  Point operator / (const T& rhs){ return Point(x / rhs, y / rhs); }
   T cross(Point rhs){ return x * rhs.y - y * rhs.x; }
   T dot(Point rhs){ return x * rhs.x + y * rhs.y; }
   T cross2(Point a, Point b){ // (a - this) cross (b - this)
@@ -832,6 +832,13 @@ template<class T> struct Point {
   T dot2(Point a, Point b){ // (a - this) dot (b - this)
     return (a - *this).dot(b - *this);
   }
+};
+struct Circle {
+  Point<double>O;
+  double R;
+  Circle(): O(), R(0) {}
+  Circle(double _R): O(), R(_R) {}
+  Circle(double _x, double _y, double _R): O(_x, _y), R(_R) {}
 };
 \end{code}
 \subsection{Geometry}
@@ -864,11 +871,23 @@ template<class T> bool seg_intersect(Point<T>p1, Point<T>p2, Point<T>p3, Point<T
     return between(p1, p2, p3) || between(p1, p2, p4) || between(p3, p4, p1) || between(p3, p4, p2);
   return a123 * a124 <= 0 && a341 * a342 <= 0;
 }
-template<class T> Point<T> intersect_at(Point<T> a, Point<T> b, Point<T> c, Point<T> d) {
+template<class T> Point<T> point2point_intersect_at(Point<T> a, Point<T> b, Point<T> c, Point<T> d) {
   // line(a, b), line(c, d)
   T a123 = a.cross(b, c);
   T a124 = a.cross(b, d);
   return (d * a123 - c * a124) / (a123 - a124);
+}
+bool circle2circle_intersect_at(Circle c1, Circle c2, Point<double>&p1, Point<double>&p2){
+  // return 1 if has intersect points
+  Point<double>o1 = c1.O, o2 = c2.O; 
+  Point<double>od = o1 - o2;
+    double r1 = a.R, r2 = b.R, d2 = od.dot(od), d = sqrt(d2);
+  if(d < max(r1, r2) - min(r1, r2) || d > r1 + r2) return 0;
+  Point<double> u = (o1 + o2) * 0.5 + (o1 - o2) * ((r2 * r2 - r1 * r1) / (2 * d2));
+  double A = sqrt((r1 + r2 + d) * (r1 - r2 + d) * (r1 + r2 - d) * (-r1 + r2 + d));
+  Point<double> v = Point(o1.y - o2.y, -o1.x + o2.x) * A / (2 * d2);
+  p1 = u + v, p2 = u - v;
+  return 1;  
 }
 template<class T> int point_in_convex_polygon(vector<Point<T>>& a, Point<T>p){
   // 1: IN
@@ -1813,4 +1832,6 @@ A pair of sequences of nonnegative integers $a_1\ge\cdots\ge a_n$ and $b_1,\ldot
   \item if $x$ is odd, then $f(x) = \frac{(x + 1)^2}{4}$
 \end{itemize}
 \end{itemize}
+\item Hockey-stick identity: $\displaystyle\sum_{i = 0}^n {i\choose k} = \displaystyle\sum_{i = k}^n {i \choose k} = {{n + 1}\choose{k + 1}}$
+\item Vandermonde's identity: $\displaystyle\sum_{k_1 + \cdots + k_p = m} {{n_1}\choose{k_1}}{{n_2}\choose{k_2}} \cdots {{n_p}\choose{k_p}} = {{n_1 + \cdots + n_p}\choose m}$
 \end{document}

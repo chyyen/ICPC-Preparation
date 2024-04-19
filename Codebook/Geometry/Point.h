@@ -7,8 +7,8 @@ template<class T> struct Point {
 
 	Point operator + (const Point& rhs){ return Point(x + rhs.x, y + rhs.y); }
 	Point operator - (const Point& rhs){ return Point(x - rhs.x, y - rhs.y); }
-	Point operator * (const int& rhs){ return Point(x * rhs, y * rhs); }
-	Point operator / (const int& rhs){ return Point(x / rhs, y / rhs); }
+	Point operator * (const T& rhs){ return Point(x * rhs, y * rhs); }
+	Point operator / (const T& rhs){ return Point(x / rhs, y / rhs); }
 
 	T cross(Point rhs){ return x * rhs.y - y * rhs.x; }
 	T dot(Point rhs){ return x * rhs.x + y * rhs.y; }
@@ -19,4 +19,13 @@ template<class T> struct Point {
 	T dot2(Point a, Point b){ // (a - this) dot (b - this)
 		return (a - *this).dot(b - *this);
 	}
+};
+
+struct Circle {
+	Point<double>O;
+	double R;
+
+	Circle(): O(), R(0) {}
+	Circle(double _R): O(), R(_R) {}
+	Circle(double _x, double _y, double _R): O(_x, _y), R(_R) {}
 };

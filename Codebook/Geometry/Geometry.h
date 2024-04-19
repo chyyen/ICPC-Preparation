@@ -30,11 +30,24 @@ template<class T> bool seg_intersect(Point<T>p1, Point<T>p2, Point<T>p3, Point<T
 	return a123 * a124 <= 0 && a341 * a342 <= 0;
 }
 
-template<class T> Point<T> intersect_at(Point<T> a, Point<T> b, Point<T> c, Point<T> d) {
+template<class T> Point<T> point2point_intersect_at(Point<T> a, Point<T> b, Point<T> c, Point<T> d) {
 	// line(a, b), line(c, d)
 	T a123 = a.cross(b, c);
 	T a124 = a.cross(b, d);
 	return (d * a123 - c * a124) / (a123 - a124);
+}
+
+bool circle2circle_intersect_at(Circle c1, Circle c2, Point<double>&p1, Point<double>&p2){
+	// return 1 if has intersect points
+	Point<double>o1 = c1.O, o2 = c2.O; 
+	Point<double>od = o1 - o2;
+    double r1 = a.R, r2 = b.R, d2 = od.dot(od), d = sqrt(d2);
+	if(d < max(r1, r2) - min(r1, r2) || d > r1 + r2) return 0;
+	Point<double> u = (o1 + o2) * 0.5 + (o1 - o2) * ((r2 * r2 - r1 * r1) / (2 * d2));
+	double A = sqrt((r1 + r2 + d) * (r1 - r2 + d) * (r1 + r2 - d) * (-r1 + r2 + d));
+	Point<double> v = Point(o1.y - o2.y, -o1.x + o2.x) * A / (2 * d2);
+	p1 = u + v, p2 = u - v;
+	return 1;	
 }
 
 template<class T> int point_in_convex_polygon(vector<Point<T>>& a, Point<T>p){
