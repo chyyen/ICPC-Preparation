@@ -38,8 +38,8 @@ Flow
 	Dinic.h
 	MCMF.h
 Math
-	FastPow.h
 	EXGCD.h
+	DiscreteLog.h
 	EXCRT.h
 	FFT.h
 	NTT.h

@@ -1371,15 +1371,6 @@ struct MCMF{
 };
 \end{code}
 \section{Math}
-\subsection{FastPow}
-\begin{code}
-long long qpow(long long x, long long powcnt, long long tomod){
-  long long res = 1;
-  for(; powcnt ; powcnt >>= 1 , x = (x * x) % tomod)
-    if(1 & powcnt)
-      res = (res * x) % tomod;
-  return (res % tomod);
-}\end{code}
 \subsection{EXGCD}
 \begin{code}
 // ax + by = c
@@ -1390,6 +1381,36 @@ tuple<long long, long long, long long>exgcd(long long a, long long b){
   auto[g, x, y] = exgcd(b, a % b);
   return make_tuple(g, y, x - (a / b) * y);
 }\end{code}
+\subsection{DiscreteLog}
+\begin{code}
+int DiscreteLog(int s, int x, int y, int m) {
+  constexpr int kStep = 32000;
+  unordered_map<int, int> p;
+  int b = 1;
+  for (int i = 0; i < kStep; ++i) {
+    p[y] = i;
+    y = 1LL * y * x % m;
+    b = 1LL * b * x % m;
+  }
+  for (int i = 0; i < m + 10; i += kStep) {
+    s = 1LL * s * b % m;
+    if (p.find(s) != p.end()) return i + kStep - p[s];
+  }
+  return -1;
+}
+int DiscreteLog(int x, int y, int m) {
+  if (m == 1) return 0;
+  int s = 1;
+  for (int i = 0; i < 100; ++i) {
+    if (s == y) return i;
+    s = 1LL * s * x % m;
+  }
+  if (s == y) return 100;
+  int p = 100 + DiscreteLog(s, x, y, m);
+  if (fpow(x, p, m) != y) return -1;
+  return p;
+}
+\end{code}
 \subsection{EXCRT}
 \begin{code}
 long long inv(long long x){ return qpow(x, mod - 2, mod); }
@@ -1784,10 +1805,16 @@ $x^n     = \sum_{i=0}^{n} S(n, i) (x)_i$
 \item Catalan numbers
 $C_n = \frac{1}{n+1}{2n \choose n} = {2n \choose n}-\binom{2n \choose n+1}\ , \forall n \geq 0 $
 $C_{n+1} = \sum_{i=0}^{n} C_iC_{n-i} = \frac{2(2n+1)}{n+2}C_n,\ C_0 = 1$
-\item Hockey-stick identity
-$\sum_{i = r}^{n} {i \choose r} = {n + 1 \choose r + 1}$
-\item Vandermonde identity
-${n + m \choose k} = \sum_{i = 0}^{k} {n \choose i} {m \choose k - i}$
+\item Number of triangle when the longest edge is $x$ (if two triangles are considered the same if they are congurent)
+\begin{itemize}
+    \itemsep-0.5em
+  \item if $x$ is even, then $f(x) = \frac{x \times (x + 2)}{4}$
+  \item if $x$ is odd, then $f(x) = \frac{(x + 1)^2}{4}$
+\end{itemize}
+\item Hockey-stick identity: $\displaystyle\sum_{i = 0}^n {i\choose k} = \displaystyle\sum_{i = k}^n {i \choose k} = {{n + 1}\choose{k + 1}}$
+\item Vandermonde's identity: $\displaystyle\sum_{k_1 + \cdots + k_p = m} {{n_1}\choose{k_1}}{{n_2}\choose{k_2}} \cdots {{n_p}\choose{k_p}} = {{n_1 + \cdots + n_p}\choose m}$
+\item Ways to choosing $k$ number from $[n]$ such that no consecutive number: ${{n + k - 1}\choose k}$
+\item $\displaystyle\sum_{k = 0}^n {n\choose k} = {{2n}\choose n}$
 \end{itemize}
 \subsection{Theorem}
 \begin{itemize}
@@ -1825,13 +1852,5 @@ A pair of sequences of nonnegative integers $a_1\ge\cdots\ge a_n$ and $b_1,\ldot
   \item Volume $=\pi h^2(3r-h)/3=\pi h(3a^2+h^2)/6=\pi r^3(2+\cos\theta)(1-\cos\theta)^2/3$.
   \item Area $=2\pi rh=\pi(a^2+h^2)=2\pi r^2(1-\cos\theta)$.
 \end{itemize}
-\item Number of triangle when the longest edge is $x$ (if two triangles are considered the same if they are congurent)
-\begin{itemize}
-    \itemsep-0.5em
-  \item if $x$ is even, then $f(x) = \frac{x \times (x + 2)}{4}$
-  \item if $x$ is odd, then $f(x) = \frac{(x + 1)^2}{4}$
 \end{itemize}
-\end{itemize}
-\item Hockey-stick identity: $\displaystyle\sum_{i = 0}^n {i\choose k} = \displaystyle\sum_{i = k}^n {i \choose k} = {{n + 1}\choose{k + 1}}$
-\item Vandermonde's identity: $\displaystyle\sum_{k_1 + \cdots + k_p = m} {{n_1}\choose{k_1}}{{n_2}\choose{k_2}} \cdots {{n_p}\choose{k_p}} = {{n_1 + \cdots + n_p}\choose m}$
 \end{document}
