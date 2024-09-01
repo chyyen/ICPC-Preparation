@@ -19,6 +19,7 @@ Graph
 	Bridge.h
 	BronKerboschAlgorithm.h
 	Theorem.tex
+	Planar.h
 Tree
 	HLD.h
 	LCA.h
