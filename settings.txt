@@ -45,6 +45,4 @@
 
 \newenvironment{code}{\VerbatimEnvironment\begin{minted}[mathescape, breaklines, linenos, numbersep=5pt, frame=lines, framesep=2mm]{c++}}{\end{minted}}
 
-\title{Codebook}
-% \author{chyen}
-\date{\today}
+\title{BreakfastEatToFull \\ \large National Tsing Hua University}
